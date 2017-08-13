@@ -1,5 +1,6 @@
 package io.noizwaves.localemailuniverse;
 
+import io.noizwaves.localemailuniverse.smtp.EmailRepositoryMessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -7,6 +8,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
+import org.subethamail.smtp.TooMuchDataException;
+import org.subethamail.smtp.helper.SimpleMessageListener;
+import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
+import org.subethamail.smtp.server.SMTPServer;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import static java.util.Arrays.asList;
 
@@ -17,6 +25,15 @@ public class LocalEmailUniverseApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(LocalEmailUniverseApplication.class, args);
 	}
+
+	@Bean
+    public SMTPServer smtpServer(EmailRepositoryMessageListener listener) {
+        SMTPServer smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(listener));
+        smtpServer.setPort(8081);
+        smtpServer.start();
+
+        return smtpServer;
+    }
 
 	@Bean
 	@Profile("default")
@@ -30,4 +47,6 @@ public class LocalEmailUniverseApplication {
 			log.info("Finished loading seed data");
 		};
 	}
+
+
 }
