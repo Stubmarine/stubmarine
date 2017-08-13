@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
 
@@ -18,9 +20,13 @@ public class EmailController {
 
     @RequestMapping("/api/emails")
     public List list() {
-        return emailRepository.findAll().stream()
+        return asStream(emailRepository.findAll())
                 .map(EmailListItem::new)
                 .collect(toList());
+    }
+
+    private static <T> Stream<T> asStream(Iterable<T> iterable) {
+        return StreamSupport.stream(iterable.spliterator(), false);
     }
 
     public class EmailListItem {

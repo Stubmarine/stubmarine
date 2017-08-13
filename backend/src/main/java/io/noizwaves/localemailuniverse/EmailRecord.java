@@ -1,14 +1,23 @@
 package io.noizwaves.localemailuniverse;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "email")
 public class EmailRecord {
 
-    private final int id;
-    private final String from;
-    private final String to;
-    private final String subject;
-    private final String body;
+    @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Integer id;
+    @Column(name = "_from")
+    private String from;
+    private String to;
+    private String subject;
+    private String body;
 
-    public EmailRecord(int id, String from, String to, String subject, String body) {
+    protected EmailRecord() {}
+
+    public EmailRecord(Integer id, String from, String to, String subject, String body) {
         this.id = id;
         this.from = from;
         this.to = to;
@@ -16,7 +25,7 @@ public class EmailRecord {
         this.body = body;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
