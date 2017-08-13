@@ -3,3 +3,6 @@ frontend/elm-stuff
 frontend/node_modules
 backend/out
 backend/.gradle/
+backend/src/main/resources/static/
+backend/build/
+frontend/dist/
