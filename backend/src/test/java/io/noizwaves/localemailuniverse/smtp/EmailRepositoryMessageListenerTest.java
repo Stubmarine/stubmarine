@@ -1,7 +1,7 @@
 package io.noizwaves.localemailuniverse.smtp;
 
-import io.noizwaves.localemailuniverse.EmailRecord;
-import io.noizwaves.localemailuniverse.EmailRepository;
+import io.noizwaves.localemailuniverse.data.EmailRecord;
+import io.noizwaves.localemailuniverse.data.EmailRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

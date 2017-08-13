@@ -1,5 +1,7 @@
 package io.noizwaves.localemailuniverse;
 
+import io.noizwaves.localemailuniverse.data.EmailRecord;
+import io.noizwaves.localemailuniverse.data.EmailRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

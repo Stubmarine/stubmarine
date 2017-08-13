@@ -1,5 +1,7 @@
 package io.noizwaves.localemailuniverse;
 
+import io.noizwaves.localemailuniverse.data.EmailRecord;
+import io.noizwaves.localemailuniverse.data.EmailRepository;
 import io.noizwaves.localemailuniverse.smtp.EmailRepositoryMessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,13 +10,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
-import org.subethamail.smtp.TooMuchDataException;
-import org.subethamail.smtp.helper.SimpleMessageListener;
 import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
 import org.subethamail.smtp.server.SMTPServer;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 import static java.util.Arrays.asList;
 

@@ -1,5 +1,7 @@
 package io.noizwaves.localemailuniverse;
 
+import io.noizwaves.localemailuniverse.data.EmailRecord;
+import io.noizwaves.localemailuniverse.data.EmailRepository;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

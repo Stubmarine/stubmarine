@@ -1,4 +1,4 @@
-package io.noizwaves.localemailuniverse;
+package io.noizwaves.localemailuniverse.data;
 
 import javax.persistence.*;
 
