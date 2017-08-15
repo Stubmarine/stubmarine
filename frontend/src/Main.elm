@@ -4,10 +4,12 @@ import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Http
 import RemoteData exposing (sendRequest, RemoteData(..), WebData)
+import WebSocket
 
 type Msg
   = HelloWorld
   | UpdateEmails (WebData Emails)
+  | WSEmailsMessage String
 
 
 type alias Model =
@@ -32,6 +34,20 @@ update msg model =
       ( model, Cmd.none )
     UpdateEmails response ->
       ( { model | emails = response }, Cmd.none )
+    WSEmailsMessage newEmailStr ->
+      let
+        newEmailResult = Decode.decodeString decodeEmail newEmailStr
+        existingEmails = case model.emails of
+          Success existing ->
+            existing
+          _ ->
+            []
+      in
+        case newEmailResult of
+          Ok newEmail ->
+            ( { model | emails = (Success (existingEmails ++ [newEmail])) }, Cmd.none )
+          _ ->
+            ( model, Cmd.none )
 
 decodeEmails : Decode.Decoder Emails
 decodeEmails =
@@ -82,7 +98,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+  WebSocket.listen "ws://localhost:8080/wsapi/emails" WSEmailsMessage
 
 init : ( Model, Cmd Msg )
 init = ( Model Loading, fetchEmails )

@@ -1,6 +1,7 @@
 package io.noizwaves.localemailuniverse.smtp;
 
 
+import io.noizwaves.localemailuniverse.api.EmailWebSocketHandler;
 import io.noizwaves.localemailuniverse.data.EmailRecord;
 import io.noizwaves.localemailuniverse.data.EmailRepository;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,12 @@ import java.util.Properties;
 public class EmailRepositoryMessageListener implements SimpleMessageListener {
 
     private final EmailRepository emailRepository;
+    private final EmailWebSocketHandler wsHandler;
     private final Session session;
 
-    public EmailRepositoryMessageListener(EmailRepository emailRepository) {
+    public EmailRepositoryMessageListener(EmailRepository emailRepository, EmailWebSocketHandler wsHandler) {
         this.emailRepository = emailRepository;
+        this.wsHandler = wsHandler;
         this.session = Session.getDefaultInstance(new Properties());
     }
 
@@ -34,13 +37,15 @@ public class EmailRepositoryMessageListener implements SimpleMessageListener {
         try {
             MimeMessage message = new MimeMessage(session, data);
 
-            emailRepository.save(new EmailRecord(
+            EmailRecord result = emailRepository.save(new EmailRecord(
                     null,
                     message.getFrom()[0].toString(),
                     message.getAllRecipients()[0].toString(),
                     message.getSubject(),
                     message.getContent().toString()
             ));
+
+            wsHandler.broadcastNewEmailMessage(result);
         } catch (MessagingException e) {
             e.printStackTrace();
         }

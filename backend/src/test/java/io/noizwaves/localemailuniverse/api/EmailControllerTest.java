@@ -1,5 +1,6 @@
-package io.noizwaves.localemailuniverse;
+package io.noizwaves.localemailuniverse.api;
 
+import io.noizwaves.localemailuniverse.api.EmailController;
 import io.noizwaves.localemailuniverse.data.EmailRecord;
 import io.noizwaves.localemailuniverse.data.EmailRepository;
 import org.junit.Before;

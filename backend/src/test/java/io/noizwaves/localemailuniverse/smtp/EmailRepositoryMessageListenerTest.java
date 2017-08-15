@@ -1,5 +1,6 @@
 package io.noizwaves.localemailuniverse.smtp;
 
+import io.noizwaves.localemailuniverse.api.EmailWebSocketHandler;
 import io.noizwaves.localemailuniverse.data.EmailRecord;
 import io.noizwaves.localemailuniverse.data.EmailRepository;
 import org.junit.Test;
@@ -12,7 +13,9 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EmailRepositoryMessageListenerTest {
@@ -20,11 +23,23 @@ public class EmailRepositoryMessageListenerTest {
     @Mock
     private EmailRepository emailRepository;
 
+    @Mock
+    private EmailWebSocketHandler emailWebSocketHandler;
+
     @InjectMocks
     private EmailRepositoryMessageListener listener;
 
     @Test
     public void testDeliver() throws Exception {
+        EmailRecord savedRecord = mock(EmailRecord.class);
+        when(emailRepository.save(new EmailRecord(
+                null,
+                "Sender <sender@example.com>",
+                "Recipient <recipient@example.com>",
+                "Test Subject",
+                "Hello World!\r\n"
+        ))).thenReturn(savedRecord);
+
         String emailMessage = "Received: from 235.1.168.192.in-addr.arpa (localhost [0:0:0:0:0:0:0:1])\r\n" +
                 "        by hostname\r\n" +
                 "        with SMTP (SubEthaSMTP 3.1.7) id J6AZJWEC\r\n" +
@@ -39,15 +54,11 @@ public class EmailRepositoryMessageListenerTest {
                 "\r\n" +
                 "Hello World!\r\n";
 
+
         listener.deliver("foo", "bar", asciiInputStream(emailMessage));
 
-        verify(emailRepository).save(new EmailRecord(
-                null,
-                "Sender <sender@example.com>",
-                "Recipient <recipient@example.com>",
-                "Test Subject",
-                "Hello World!\r\n"
-        ));
+
+        verify(emailWebSocketHandler).broadcastNewEmailMessage(savedRecord);
     }
 
     private static InputStream asciiInputStream(String content) {
