@@ -1,5 +1,6 @@
 package io.noizwaves.localemailuniverse;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.noizwaves.localemailuniverse.data.EmailRecord;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -39,7 +40,8 @@ public class JaysonWebSocketHandler extends TextWebSocketHandler {
 
 
     public void broadcastNewEmailMessage(EmailRecord email) throws IOException {
-        String content = email.getId().toString();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String content = objectMapper.writeValueAsString(new EmailListItem(email));
         for(WebSocketSession webSocketSession : sessions) {
             webSocketSession.sendMessage(new TextMessage(content));
         }

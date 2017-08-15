@@ -5,7 +5,6 @@ import Html.Attributes exposing (class)
 import Http
 import RemoteData exposing (sendRequest, RemoteData(..), WebData)
 import WebSocket
-import String
 
 type Msg
   = HelloWorld
@@ -35,18 +34,18 @@ update msg model =
       ( model, Cmd.none )
     UpdateEmails response ->
       ( { model | emails = response }, Cmd.none )
-    WSEmailsMessage newEmailIdStr ->
+    WSEmailsMessage newEmailStr ->
       let
-        newEmailId = String.toInt newEmailIdStr
+        newEmailResult = Decode.decodeString decodeEmail newEmailStr
         existingEmails = case model.emails of
           Success existing ->
             existing
           _ ->
             []
       in
-        case newEmailId of
-          Ok emailId ->
-            ( { model | emails = (Success (existingEmails ++ [Email emailId "" "" ""])) }, Cmd.none )
+        case newEmailResult of
+          Ok newEmail ->
+            ( { model | emails = (Success (existingEmails ++ [newEmail])) }, Cmd.none )
           _ ->
             ( model, Cmd.none )
 
