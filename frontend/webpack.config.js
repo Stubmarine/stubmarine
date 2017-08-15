@@ -52,6 +52,10 @@ module.exports = {
         proxy: {
             '/api': {
                 target: 'http://localhost:8080'
+            },
+            '/wsapi': {
+                target: 'ws://localhost:8080',
+                ws: true
             }
         },
         stats: {colors: true},
