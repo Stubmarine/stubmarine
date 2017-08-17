@@ -57,4 +57,22 @@ public class EmailControllerTest {
 
                 .andExpect(jsonPath("$[1].id", equalTo(22)));
     }
+
+    @Test
+    public void testGet() throws Exception {
+        when(emailRepository.findOne(1))
+                .thenReturn(new EmailRecord(1, "foo", "bar", "baz", "zar"));
+
+        ResultActions resultActions = mockMvc.perform(get("/api/emails/1").contentType(MediaType.APPLICATION_JSON));
+
+        resultActions
+                .andExpect(status().isOk())
+
+                .andExpect(jsonPath("$.*", hasSize(5)))
+                .andExpect(jsonPath("$.id", equalTo(1)))
+                .andExpect(jsonPath("$.from", equalTo("foo")))
+                .andExpect(jsonPath("$.to", equalTo("bar")))
+                .andExpect(jsonPath("$.subject", equalTo("baz")))
+                .andExpect(jsonPath("$.body", equalTo("zar")));
+    }
 }

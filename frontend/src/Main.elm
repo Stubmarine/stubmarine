@@ -1,30 +1,44 @@
 import Json.Decode as Decode
 import Json.Decode.Extra exposing ((|:))
-import Html exposing (Html, div, text)
+import Html exposing (Html, div, text, dd, dt, dl, hr)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
 import Http
 import RemoteData exposing (sendRequest, RemoteData(..), WebData)
 import WebSocket
 
 type Msg
   = HelloWorld
-  | UpdateEmails (WebData Emails)
+  | UpdateEmails (WebData EmailList)
+  | SelectEmail EmailId
+  | UpdateEmail (WebData Email)
   | WSEmailsMessage String
 
 
 type alias Model =
-  { emails: WebData Emails
+  { emails: WebData EmailList
+  , email: WebData Email
   }
 
 
-type alias Email =
-    { id: Int
+type alias EmailId = Int
+
+type alias EmailListItem =
+    { id: EmailId
     , to: String
     , from: String
     , subject: String
     }
 
-type alias Emails = List Email
+type alias Email =
+    { id: EmailId
+    , to: String
+    , from: String
+    , subject: String
+    , body: String
+    }
+
+type alias EmailList = List EmailListItem
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -34,9 +48,13 @@ update msg model =
       ( model, Cmd.none )
     UpdateEmails response ->
       ( { model | emails = response }, Cmd.none )
+    UpdateEmail response ->
+      ( { model | email = response }, Cmd.none )
+    SelectEmail id ->
+      ( model, fetchEmail id )
     WSEmailsMessage newEmailStr ->
       let
-        newEmailResult = Decode.decodeString decodeEmail newEmailStr
+        newEmailResult = Decode.decodeString decodeEmailListItem newEmailStr
         existingEmails = case model.emails of
           Success existing ->
             existing
@@ -49,9 +67,17 @@ update msg model =
           _ ->
             ( model, Cmd.none )
 
-decodeEmails : Decode.Decoder Emails
+decodeEmails : Decode.Decoder EmailList
 decodeEmails =
-  Decode.list decodeEmail
+  Decode.list decodeEmailListItem
+
+decodeEmailListItem : Decode.Decoder EmailListItem
+decodeEmailListItem =
+  Decode.succeed EmailListItem
+    |: (Decode.field "id" Decode.int)
+    |: (Decode.field "to" Decode.string)
+    |: (Decode.field "from" Decode.string)
+    |: (Decode.field "subject" Decode.string)
 
 decodeEmail : Decode.Decoder Email
 decodeEmail =
@@ -60,9 +86,10 @@ decodeEmail =
     |: (Decode.field "to" Decode.string)
     |: (Decode.field "from" Decode.string)
     |: (Decode.field "subject" Decode.string)
+    |: (Decode.field "body" Decode.string)
 
-fetchEmails : Cmd Msg
-fetchEmails =
+fetchEmailList : Cmd Msg
+fetchEmailList =
   Http.request
     { method = "GET"
     , headers = [ ]
@@ -75,9 +102,23 @@ fetchEmails =
     |> RemoteData.sendRequest
     |> Cmd.map UpdateEmails
 
-viewEmail : Email -> Html Msg
-viewEmail email =
-  div [ class "email" ]
+fetchEmail : EmailId -> Cmd Msg
+fetchEmail id =
+  Http.request
+    { method = "GET"
+    , headers = [ ]
+    , url = "/api/emails/" ++ (toString id)
+    , body = Http.emptyBody
+    , expect = Http.expectJson decodeEmail
+    , timeout = Nothing
+    , withCredentials = False
+    }
+    |> RemoteData.sendRequest
+    |> Cmd.map UpdateEmail
+
+viewEmailListItem : EmailListItem -> Html Msg
+viewEmailListItem email =
+  div [ class "email", onClick (SelectEmail email.id) ]
     [ div [] [ text "To: ", text email.to ]
     , div [] [ text "From: ", text email.from ]
     , div [] [ text "Subject: ", text email.subject ]
@@ -88,20 +129,42 @@ view model =
   let
     emails = case model.emails of
       Success emailsList ->
-        List.map viewEmail emailsList
+        List.map viewEmailListItem emailsList
       Loading ->
         [ div [] [ text "Loading..." ] ]
       _ ->
         [ div [] [] ]
+    emailList = [ div [ class "email-list" ] emails ]
+    emailDetail = case model.email of
+      NotAsked ->
+        []
+      Loading ->
+        [ div [ class "email-detail" ] [ text "Loading..." ] ]
+      Success email ->
+        [ div [ class "email-detail" ]
+          [ dl []
+            [ dt [] [ text "From" ]
+            , dd [] [ text email.from ]
+            , dt [] [ text "To" ]
+            , dd [] [ text email.to ]
+            , dt [] [ text "Subject" ]
+            , dd [] [ text email.subject ]
+            , hr [] []
+            , div [] [ text email.body ]
+            ]
+          ]
+        ]
+      Failure err ->
+        [ div [ class "email-detail" ] [ text "Error" ] ]
   in
-    div [] emails
+    div [ class "email-pane" ] (emailList ++ emailDetail)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
   WebSocket.listen "ws://localhost:8080/wsapi/emails" WSEmailsMessage
 
 init : ( Model, Cmd Msg )
-init = ( Model Loading, fetchEmails )
+init = ( Model Loading NotAsked, fetchEmailList )
 
 main : Program Never Model Msg
 main =

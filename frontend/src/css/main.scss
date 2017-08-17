@@ -3,4 +3,29 @@
   margin: 5px;
   border: 1px solid grey;
   border-radius: 5px;
+  cursor: pointer;
+}
+
+.email:hover {
+  background-color: #efefef;
+}
+
+.email-pane {
+  display: flex;
+}
+
+.email-list, .email-detail {
+  flex: 1;
+}
+
+.email-detail {
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid grey;
+  border-radius: 5px;
+
+  dl {
+    margin-top: 0em;
+    margin-bottom: 0em;
+  }
 }
