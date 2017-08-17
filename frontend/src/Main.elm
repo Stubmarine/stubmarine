@@ -1,3 +1,5 @@
+port module Main exposing (..)
+
 import Json.Decode as Decode
 import Json.Decode.Extra exposing ((|:))
 import Html exposing (Html, div, text)
@@ -5,6 +7,8 @@ import Html.Attributes exposing (class)
 import Http
 import RemoteData exposing (sendRequest, RemoteData(..), WebData)
 import WebSocket
+
+
 
 type Msg
   = HelloWorld
@@ -18,13 +22,20 @@ type alias Model =
 
 
 type alias Email =
-    { id: Int
-    , to: String
-    , from: String
-    , subject: String
-    }
+  { id: Int
+  , to: String
+  , from: String
+  , subject: String
+  }
 
 type alias Emails = List Email
+
+type alias BrowserNotification =
+  { title: String
+  , body: String
+  }
+
+port notifyBrowser : BrowserNotification -> Cmd msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -45,7 +56,8 @@ update msg model =
       in
         case newEmailResult of
           Ok newEmail ->
-            ( { model | emails = (Success (existingEmails ++ [newEmail])) }, Cmd.none )
+            ( { model | emails = (Success (existingEmails ++ [newEmail])) }
+            , notifyBrowser (BrowserNotification newEmail.from newEmail.subject) )
           _ ->
             ( model, Cmd.none )
 
