@@ -1,8 +1,8 @@
-package io.noizwaves.localemailuniverse;
+package io.wallraff;
 
-import io.noizwaves.localemailuniverse.data.EmailRecord;
-import io.noizwaves.localemailuniverse.data.EmailRepository;
-import io.noizwaves.localemailuniverse.smtp.EmailRepositoryMessageListener;
+import io.wallraff.data.EmailRecord;
+import io.wallraff.data.EmailRepository;
+import io.wallraff.smtp.EmailRepositoryMessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -16,11 +16,11 @@ import org.subethamail.smtp.server.SMTPServer;
 import static java.util.Arrays.asList;
 
 @SpringBootApplication
-public class LocalEmailUniverseApplication {
-	private static final Logger log = LoggerFactory.getLogger(LocalEmailUniverseApplication.class);
+public class WallraffApplication {
+	private static final Logger log = LoggerFactory.getLogger(WallraffApplication.class);
 
 	public static void main(String[] args) {
-		SpringApplication.run(LocalEmailUniverseApplication.class, args);
+		SpringApplication.run(WallraffApplication.class, args);
 	}
 
 	@Bean

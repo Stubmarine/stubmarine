@@ -1,7 +1,7 @@
-package io.noizwaves.localemailuniverse.api;
+package io.wallraff.api;
 
 
-import io.noizwaves.localemailuniverse.data.EmailRecord;
+import io.wallraff.data.EmailRecord;
 
 public class EmailListItem {
     private final EmailRecord record;

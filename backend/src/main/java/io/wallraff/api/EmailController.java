@@ -1,6 +1,6 @@
-package io.noizwaves.localemailuniverse.api;
+package io.wallraff.api;
 
-import io.noizwaves.localemailuniverse.data.EmailRepository;
+import io.wallraff.data.EmailRepository;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

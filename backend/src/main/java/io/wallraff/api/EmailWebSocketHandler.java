@@ -1,7 +1,7 @@
-package io.noizwaves.localemailuniverse.api;
+package io.wallraff.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.noizwaves.localemailuniverse.data.EmailRecord;
+import io.wallraff.data.EmailRecord;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;

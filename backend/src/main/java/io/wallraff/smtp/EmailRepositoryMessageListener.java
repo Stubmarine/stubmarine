@@ -1,9 +1,9 @@
-package io.noizwaves.localemailuniverse.smtp;
+package io.wallraff.smtp;
 
 
-import io.noizwaves.localemailuniverse.api.EmailWebSocketHandler;
-import io.noizwaves.localemailuniverse.data.EmailRecord;
-import io.noizwaves.localemailuniverse.data.EmailRepository;
+import io.wallraff.api.EmailWebSocketHandler;
+import io.wallraff.data.EmailRecord;
+import io.wallraff.data.EmailRepository;
 import org.springframework.stereotype.Service;
 import org.subethamail.smtp.helper.SimpleMessageListener;
 

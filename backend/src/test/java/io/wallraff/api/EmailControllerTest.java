@@ -1,8 +1,7 @@
-package io.noizwaves.localemailuniverse.api;
+package io.wallraff.api;
 
-import io.noizwaves.localemailuniverse.api.EmailController;
-import io.noizwaves.localemailuniverse.data.EmailRecord;
-import io.noizwaves.localemailuniverse.data.EmailRepository;
+import io.wallraff.data.EmailRecord;
+import io.wallraff.data.EmailRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -1,6 +1,6 @@
-package io.noizwaves.localemailuniverse;
+package io.wallraff;
 
-import io.noizwaves.localemailuniverse.api.EmailWebSocketHandler;
+import io.wallraff.api.EmailWebSocketHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;

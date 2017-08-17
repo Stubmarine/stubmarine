@@ -1,16 +1,24 @@
-# {Local Email Universe}
+# Wallraff
 
 Simulate email universe that assists in development of software.
 
 ## Getting Started
 
+### Install Dependencies
+
 1. Install/update yarn globally
 1. `cd frontend`, `yarn install`, and `cd ..`
 1. `cd backend`, and `./gradlew`
 
-1. `cd backend`, `./gradew bootRun`, and `cd ..`
-1. `cd frontend`, and `yarn start`
-1. Open [localhost:3000](http://localhost:3000) in your browser of choice
+### Start Application
+
+1. Start the backend by:
+    1. `cd backend`
+    1. `./gradew bootRun`
+1. Start the frontend by:
+    1. `cd frontend`
+    1. `yarn start`
+1. Navigate to [localhost:3000](http://localhost:3000)
 
 ## Building an Uberjar
 

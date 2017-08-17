@@ -1,4 +1,4 @@
-package io.noizwaves.localemailuniverse.data;
+package io.wallraff.data;
 
 import javax.persistence.*;
 
