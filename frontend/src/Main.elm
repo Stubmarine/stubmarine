@@ -161,7 +161,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  WebSocket.listen "ws://localhost:8080/wsapi/emails" WSEmailsMessage
+  WebSocket.listen "ws://localhost:3000/wsapi/emails" WSEmailsMessage
 
 init : ( Model, Cmd Msg )
 init = ( Model Loading NotAsked, fetchEmailList )
