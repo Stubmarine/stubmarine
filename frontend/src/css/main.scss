@@ -1,9 +1,33 @@
+@import 'reset';
+@import 'constants';
+@import 'font';
+@import 'layout';
+
+body {
+  background-color: $background-color;
+  font-family: $font-family;
+}
+
 .email {
-  padding: 10px;
-  margin: 5px;
-  border: 1px solid grey;
-  border-radius: 5px;
+  padding: $standard-spacing;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  background-color: $white;
+  margin-bottom: -1px;
+
+  font-size: 0.9 * $standard-spacing;
+  font-family: $mono-font-family;
+
   cursor: pointer;
+
+  &:first-child {
+    border-top-right-radius: $radius;
+    border-top-left-radius: $radius;
+  }
+
+  &:last-child {
+    border-bottom-right-radius: $radius;
+    border-bottom-left-radius: $radius;
+  }
 }
 
 .email:hover {
@@ -16,16 +40,43 @@
 
 .email-list, .email-detail {
   flex: 1;
+  margin-left: $standard-spacing / 2;
+  margin-right: $standard-spacing / 2;
 }
 
 .email-detail {
-  padding: 10px;
-  margin: 5px;
-  border: 1px solid grey;
-  border-radius: 5px;
+  font-family: $mono-font-family;
+  padding: $standard-spacing;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  margin-bottom: -1px;
+  background-color: $white;
+
+  border-radius: $radius;
 
   dl {
     margin-top: 0em;
     margin-bottom: 0em;
+
+    dd, dt {
+      display: inline;
+    }
+
+    dd {
+      margin-left: 0.5 * $standard-spacing;
+    }
+
+    dt::before {
+      content: '';
+      display: block;
+    }
+
+    hr {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  &--body {
+    font-family: $mono-font-family;
   }
 }

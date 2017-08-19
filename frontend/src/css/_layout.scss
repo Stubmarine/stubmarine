@@ -1,0 +1,53 @@
+@import 'constants';
+
+.nav-bar {
+  background-color: $navbar-color;
+}
+
+.nav {
+  display: flex;
+  flex-direction: row;
+}
+
+.logo {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  margin-left: 0.5rem;
+  margin-right: 1.5rem;
+
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: $white;
+}
+
+.nav-item {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+
+  font-size: 1rem;
+  color: $white;
+  font-weight: 300;
+}
+
+.page-content {
+  margin-top: $standard-spacing;
+  width: $page-width;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.container {
+  width: $page-width;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.container__nav {
+  display: flex;
+  flex-direction: row;
+}
