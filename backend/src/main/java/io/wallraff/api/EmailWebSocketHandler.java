@@ -29,8 +29,8 @@ public class EmailWebSocketHandler extends TextWebSocketHandler {
     }
 
     public void broadcastNewEmailMessage(EmailRecord email) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String content = objectMapper.writeValueAsString(new EmailListItem(email));
+        String content = new ObjectMapper().writeValueAsString(email);
+
         for(WebSocketSession webSocketSession : sessions) {
             webSocketSession.sendMessage(new TextMessage(content));
         }

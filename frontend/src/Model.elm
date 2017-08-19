@@ -9,13 +9,6 @@ type alias Model =
 
 type alias EmailId = Int
 
-type alias EmailListItem =
-    { id: EmailId
-    , to: String
-    , from: String
-    , subject: String
-    }
-
 type alias Email =
     { id: EmailId
     , to: String
@@ -24,4 +17,4 @@ type alias Email =
     , body: String
     }
 
-type alias EmailList = List EmailListItem
+type alias EmailList = List Email

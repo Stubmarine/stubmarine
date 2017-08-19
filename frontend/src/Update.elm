@@ -22,7 +22,7 @@ update msg model =
       ( model, fetchEmail id )
     WSEmailsMessage newEmailStr ->
       let
-        newEmailResult = Decode.decodeString decodeEmailListItem newEmailStr
+        newEmailResult = Decode.decodeString decodeEmail newEmailStr
         existingEmails = case model.emails of
           Success existing ->
             existing
@@ -37,15 +37,7 @@ update msg model =
 
 decodeEmails : Decode.Decoder EmailList
 decodeEmails =
-  Decode.list decodeEmailListItem
-
-decodeEmailListItem : Decode.Decoder EmailListItem
-decodeEmailListItem =
-  Decode.succeed EmailListItem
-    |: (Decode.field "id" Decode.int)
-    |: (Decode.field "to" Decode.string)
-    |: (Decode.field "from" Decode.string)
-    |: (Decode.field "subject" Decode.string)
+  Decode.list decodeEmail
 
 decodeEmail : Decode.Decoder Email
 decodeEmail =

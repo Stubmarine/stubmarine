@@ -9,7 +9,7 @@ import RemoteData exposing (RemoteData(..))
 import Model exposing (..)
 import Message exposing (..)
 
-viewEmailListItem : EmailListItem -> Html Msg
+viewEmailListItem : Email -> Html Msg
 viewEmailListItem email =
   div [ class "email", onClick (SelectEmail email.id) ]
     [ div [] [ text "From: ", text email.from ]

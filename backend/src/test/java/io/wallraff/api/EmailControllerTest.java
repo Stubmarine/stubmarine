@@ -49,11 +49,12 @@ public class EmailControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
 
-                .andExpect(jsonPath("$[0].*", hasSize(4)))
+                .andExpect(jsonPath("$[0].*", hasSize(5)))
                 .andExpect(jsonPath("$[0].id", equalTo(1)))
                 .andExpect(jsonPath("$[0].from", equalTo("foo")))
                 .andExpect(jsonPath("$[0].to", equalTo("bar")))
                 .andExpect(jsonPath("$[0].subject", equalTo("baz")))
+                .andExpect(jsonPath("$[0].body", equalTo("zar")))
 
                 .andExpect(jsonPath("$[1].id", equalTo(22)));
     }

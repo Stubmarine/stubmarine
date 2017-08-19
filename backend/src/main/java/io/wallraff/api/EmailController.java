@@ -23,9 +23,7 @@ public class EmailController {
 
     @RequestMapping("/api/emails")
     public List list() {
-        return asStream(emailRepository.findAll())
-                .map(EmailListItem::new)
-                .collect(toList());
+        return asStream(emailRepository.findAll()).collect(toList());
     }
 
     @RequestMapping("/api/emails/{id}")
