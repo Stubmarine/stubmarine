@@ -119,8 +119,8 @@ fetchEmail id =
 viewEmailListItem : EmailListItem -> Html Msg
 viewEmailListItem email =
   div [ class "email", onClick (SelectEmail email.id) ]
-    [ div [] [ text "To: ", text email.to ]
-    , div [] [ text "From: ", text email.from ]
+    [ div [] [ text "From: ", text email.from ]
+    , div [] [ text "To: ", text email.to ]
     , div [] [ text "Subject: ", text email.subject ]
     ]
 
