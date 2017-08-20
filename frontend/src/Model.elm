@@ -3,7 +3,7 @@ module Model exposing (..)
 import RemoteData exposing (WebData)
 
 type alias Model =
-  { apiHost: String
+  { wsapiBasePath: String
   , emails: WebData EmailList
   , email: WebData Email
   }

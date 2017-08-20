@@ -8,11 +8,11 @@ import Update exposing (update, fetchEmailList)
 import View exposing (view)
 
 type alias Flags =
-  { apiHost: String
+  { wsapiBasePath: String
   }
 
 init : Flags -> ( Model, Cmd Msg )
-init flags = ( Model flags.apiHost Loading NotAsked, fetchEmailList )
+init flags = ( Model flags.wsapiBasePath Loading NotAsked, fetchEmailList )
 
 main : Program Flags Model Msg
 main =
