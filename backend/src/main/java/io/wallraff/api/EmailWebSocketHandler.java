@@ -24,12 +24,11 @@ public class EmailWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        super.afterConnectionClosed(session, status);
         sessions.remove(session);
     }
 
     public void broadcastNewEmailMessage(EmailRecord email) throws IOException {
-        String content = new ObjectMapper().writeValueAsString(email);
+        final String content = new ObjectMapper().writeValueAsString(email);
 
         for(WebSocketSession webSocketSession : sessions) {
             webSocketSession.sendMessage(new TextMessage(content));
