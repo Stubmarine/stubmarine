@@ -6,4 +6,7 @@ import WebSocket
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  WebSocket.listen "ws://localhost:3000/wsapi/emails" WSEmailsMessage
+  let
+    url = "ws://" ++ model.apiHost ++ "/wsapi/emails"
+  in
+    WebSocket.listen url WSEmailsMessage

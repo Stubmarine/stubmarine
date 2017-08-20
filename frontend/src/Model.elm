@@ -3,7 +3,8 @@ module Model exposing (..)
 import RemoteData exposing (WebData)
 
 type alias Model =
-  { emails: WebData EmailList
+  { apiHost: String
+  , emails: WebData EmailList
   , email: WebData Email
   }
 

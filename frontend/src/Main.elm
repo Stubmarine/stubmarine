@@ -1,4 +1,4 @@
-import Html exposing (Html)
+import Html exposing (programWithFlags)
 import RemoteData exposing (RemoteData(..))
 
 import Message exposing (Msg)
@@ -7,13 +7,16 @@ import Subscriptions exposing (subscriptions)
 import Update exposing (update, fetchEmailList)
 import View exposing (view)
 
+type alias Flags =
+  { apiHost: String
+  }
 
-init : ( Model, Cmd Msg )
-init = ( Model Loading NotAsked, fetchEmailList )
+init : Flags -> ( Model, Cmd Msg )
+init flags = ( Model flags.apiHost Loading NotAsked, fetchEmailList )
 
-main : Program Never Model Msg
+main : Program Flags Model Msg
 main =
-  Html.program
+  programWithFlags
     { init = init
     , view = view
     , update = update
