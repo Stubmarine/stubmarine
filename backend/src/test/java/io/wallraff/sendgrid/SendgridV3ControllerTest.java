@@ -3,7 +3,6 @@ package io.wallraff.sendgrid;
 import io.wallraff.api.EmailWebSocketHandler;
 import io.wallraff.data.EmailRecord;
 import io.wallraff.data.EmailRepository;
-import io.wallraff.smtp.EmailRepositoryMessageListener;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

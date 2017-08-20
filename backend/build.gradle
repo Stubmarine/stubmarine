@@ -28,8 +28,5 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('com.h2database:h2')
 
-    // https://mvnrepository.com/artifact/org.subethamail/subethasmtp
-    compile group: 'org.subethamail', name: 'subethasmtp', version: '3.1.7'
-
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
