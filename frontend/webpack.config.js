@@ -1,6 +1,7 @@
 path = require("path");
 
-var entryApp = './src/index.js';
+const entryApp = './src/index.js';
+const elmSource = __dirname;
 
 module.exports = {
     entry: {
@@ -32,7 +33,7 @@ module.exports = {
             {
                 test: /\.elm$/,
                 exclude: [/elm-stuff/, /node_modules/],
-                loader: 'elm-webpack-loader?verbose=true&warn=true',
+                loader: 'elm-webpack-loader?verbose=true&warn=true&cwd=' + elmSource,
             },
             {
                 test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
