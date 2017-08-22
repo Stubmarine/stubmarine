@@ -1,0 +1,29 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.5.6.RELEASE"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile project(":backend")
+
+    testCompile group: 'org.fluentlenium', name: 'fluentlenium-core', version: '3.3.0'
+    testCompile group: 'org.fluentlenium', name: 'fluentlenium-junit', version: '3.3.0'
+    testCompile group: 'org.seleniumhq.selenium', name: 'selenium-chrome-driver', version: '2.53.1'
+
+    testCompile "org.springframework.boot:spring-boot-starter-test:1.5.6.RELEASE"
+    testCompile 'junit:junit:4.12'
+}

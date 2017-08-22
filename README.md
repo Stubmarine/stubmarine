@@ -6,6 +6,7 @@ Simulate email universe that assists in development of software.
 
 ### Install Dependencies
 
+1. `brew install chromedriver`
 1. Install/update yarn globally
 1. `cd frontend`, `yarn install`, and `cd ..`
 1. `cd backend`, and `./gradlew`
