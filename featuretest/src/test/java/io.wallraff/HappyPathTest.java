@@ -1,35 +1,74 @@
 package io.wallraff;
 
+import com.sendgrid.*;
 import org.fluentlenium.adapter.junit.FluentTest;
-import org.junit.After;
-import org.junit.Before;
+import org.fluentlenium.core.domain.FluentList;
+import org.fluentlenium.core.domain.FluentWebElement;
 import org.junit.Test;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.junit.runner.RunWith;
+import org.springframework.boot.context.embedded.LocalServerPort;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.fluentlenium.core.filter.FilterConstructor.withText;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.springframework.http.HttpStatus.ACCEPTED;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = WallraffApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class HappyPathTest extends FluentTest {
 
-    private ConfigurableApplicationContext applicationContext;
+    @LocalServerPort
+    private int port;
 
-    @Before
-    public void before() throws Exception {
-        applicationContext = SpringApplication.run(WallraffApplication.class, "--server.port=9292");
-    }
-
-    @After
-    public void after() throws Exception {
-        applicationContext.close();
-    }
+    private final String hostname = "localhost";
 
     @Test()
-    public void testAppLoads() {
-        goTo("http://localhost:9292");
+    public void testEmailAppears() throws Exception {
+        goTo("http://" + hostname + ":" + port);
 
         assertThat(window().title(), equalTo("Wallraff"));
-
         assertThat($(".logo").text(), equalTo("Wallraff"));
+
+        Response sendEmailResponse = sendEmailUsingSendgrid();
+
+        assertEquals(sendEmailResponse.getStatusCode(), ACCEPTED.value());
+
+        assertExists($("div", withText("From: sendgrid@example.com")));
+        assertExists($("div", withText("To: featuretest@example.com")));
+        assertExists($("div", withText("Subject: Sending with SendGrid is Fun")));
+
+        $(".email").click();
+        Thread.sleep(100); // because await() is broken
+
+        assertExists($("dd", withText("sendgrid@example.com")));
+        assertExists($("dd", withText("featuretest@example.com")));
+        assertExists($("dd", withText("Sending with SendGrid is Fun")));
+        assertExists($(".email-detail--body", withText("B0dy")));
+    }
+
+    private Response sendEmailUsingSendgrid() throws Exception {
+        Email from = new Email("sendgrid@example.com");
+        String subject = "Sending with SendGrid is Fun";
+        Email to = new Email("featuretest@example.com");
+        Content content = new Content("text/plain", "B0dy");
+        Mail mail = new Mail(from, subject, to, content);
+
+        SendGrid sg = new SendGrid("1234", true);
+        sg.setHost(hostname + ":" + port + "/eapi/sendgrid");
+
+        Request request = new Request();
+        request.setMethod(Method.POST);
+        request.setEndpoint("mail/send");
+        request.setBody(mail.build());
+        Response response = sg.api(request);
+
+        return response;
+    }
+
+    private void assertExists(FluentList<FluentWebElement> elements) {
+        assertEquals(elements.size(), 1);
     }
 }
