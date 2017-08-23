@@ -1,0 +1,13 @@
+task testAll() {
+    dependsOn = [":backend:test", ":featuretest:test"]
+}
+
+task copyFrontEnd(type:Copy) {
+    from "frontend/dist"
+    into "backend/src/main/resources/static"
+}
+copyFrontEnd.dependsOn(":frontend:build")
+
+task buildUberJar() {
+}
+buildUberJar.dependsOn("copyFrontEnd", ":backend:clean", ":backend:build", ":backend:jar")

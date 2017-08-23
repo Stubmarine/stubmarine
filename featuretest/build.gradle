@@ -29,3 +29,5 @@ dependencies {
 
     testCompile group: 'com.sendgrid', name: 'sendgrid-java', version: '4.1.0'
 }
+
+test.outputs.upToDateWhen { false }

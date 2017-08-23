@@ -9,3 +9,5 @@ frontend/dist/
 featuretest/.gradle/
 featuretest/out
 featuretest/target
+.gradle
+featuretest/build/

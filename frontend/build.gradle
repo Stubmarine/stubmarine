@@ -1,0 +1,8 @@
+task build(type:Exec) {
+    commandLine 'yarn', 'build'
+}
+build.dependsOn('clean')
+
+task clean(type: Delete) {
+    delete 'dist'
+}
