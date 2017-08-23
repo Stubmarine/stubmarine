@@ -31,7 +31,6 @@ public class HappyPathTest extends FluentTest {
     @Override
     public WebDriver newWebDriver() {
         ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--headless");
         return new ChromeDriver(chromeOptions);
     }
 
