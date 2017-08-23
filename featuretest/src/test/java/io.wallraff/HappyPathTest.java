@@ -6,6 +6,9 @@ import org.fluentlenium.core.domain.FluentList;
 import org.fluentlenium.core.domain.FluentWebElement;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -24,6 +27,13 @@ public class HappyPathTest extends FluentTest {
     private int port;
 
     private final String hostname = "localhost";
+
+    @Override
+    public WebDriver newWebDriver() {
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.addArguments("--headless");
+        return new ChromeDriver(chromeOptions);
+    }
 
     @Test()
     public void testEmailAppears() throws Exception {
