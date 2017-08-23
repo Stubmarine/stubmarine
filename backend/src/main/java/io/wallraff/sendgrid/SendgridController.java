@@ -10,13 +10,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @RestController
-public class SendgridV3Controller {
+public class SendgridController {
     private final EmailRepository emailRepository;
     private final EmailWebSocketHandler emailWebSocketHandler;
 
-    public SendgridV3Controller(
+    public SendgridController(
             EmailRepository emailRepository,
             EmailWebSocketHandler emailWebSocketHandler
     ) {
@@ -32,7 +35,7 @@ public class SendgridV3Controller {
                 form.getPersonalizations().stream()
                         .flatMap(p -> p.getTo().stream())
                         .map(AddressForm::getEmail)
-                        .reduce("", (s, s2) -> s + s2),
+                        .reduce("", (s, s2) -> s + (s.equals("") ? "" : ", ") + s2),
                 form.getSubject(),
                 form.getContent().stream()
                         .filter(c -> c.getType().equals("text/plain"))

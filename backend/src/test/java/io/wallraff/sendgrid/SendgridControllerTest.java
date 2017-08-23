@@ -20,10 +20,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SendgridV3ControllerTest {
+public class SendgridControllerTest {
 
     @InjectMocks
-    private SendgridV3Controller controller;
+    private SendgridController controller;
 
     @Mock
     private EmailRepository emailRepository;
@@ -43,8 +43,8 @@ public class SendgridV3ControllerTest {
         EmailRecord savedRecord = mock(EmailRecord.class);
         when(emailRepository.save(new EmailRecord(
                 null,
-                "sender@sendgrid.com",
-                "recip@sendgrid.com",
+                "sender@example.com",
+                "to@example.com",
                 "My subjecT",
                 "Content content content!"
         ))).thenReturn(savedRecord);
@@ -53,12 +53,12 @@ public class SendgridV3ControllerTest {
                 "{" +
                 "  \"personalizations\": [{" +
                 "    \"to\": [{" +
-                "      \"email\": \"recip@sendgrid.com\"" +
+                "      \"email\": \"to@example.com\"" +
                 "    }]" +
                 "  }]," +
                 "  \"subject\": \"My subjecT\"," +
                 "  \"from\": {" +
-                "    \"email\": \"sender@sendgrid.com\"" +
+                "    \"email\": \"sender@example.com\"" +
                 "  }," +
                 "  \"content\": [{" +
                 "    \"type\": \"text/plain\"," +
@@ -76,6 +76,51 @@ public class SendgridV3ControllerTest {
         resultActions
                 .andExpect(status().isAccepted())
                 .andExpect(content().string(""));
+
+        verify(emailWebSocketHandler).broadcastNewEmailMessage(savedRecord);
+    }
+
+    @Test
+    public void testMailSend_MultipleRecipients() throws Exception {
+        EmailRecord savedRecord = mock(EmailRecord.class);
+        when(emailRepository.save(new EmailRecord(
+                null,
+                "sender@example.com",
+                "to1@example.com, to2@example.com, to3@example.com",
+                "My subjecT",
+                "Content content content!"
+        ))).thenReturn(savedRecord);
+
+        String content = "" +
+                "{" +
+                "  \"personalizations\": [{" +
+                "    \"to\": [{" +
+                "      \"email\": \"to1@example.com\"" +
+                "    }, {" +
+                "      \"email\": \"to2@example.com\"" +
+                "    }" +
+                "  ]}, {" +
+                "    \"to\": [{" +
+                "      \"email\": \"to3@example.com\"" +
+                "    }]" +
+                "  }]," +
+                "  \"subject\": \"My subjecT\"," +
+                "  \"from\": {" +
+                "    \"email\": \"sender@example.com\"" +
+                "  }," +
+                "  \"content\": [{" +
+                "    \"type\": \"text/plain\"," +
+                "    \"value\": \"Content content content!\"" +
+                "  }]" +
+                "}";
+
+
+        mockMvc.perform(
+                post("/eapi/sendgrid/v3/mail/send")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content)
+        );
+
 
         verify(emailWebSocketHandler).broadcastNewEmailMessage(savedRecord);
     }

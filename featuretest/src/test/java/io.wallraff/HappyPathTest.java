@@ -46,14 +46,14 @@ public class HappyPathTest extends FluentTest {
         assertEquals(sendEmailResponse.getStatusCode(), ACCEPTED.value());
 
         assertExists($("div", withText("From: sendgrid@example.com")));
-        assertExists($("div", withText("To: featuretest@example.com")));
+        assertExists($("div", withText("To: featuretest@example.com, anotherto@example.com")));
         assertExists($("div", withText("Subject: Sending with SendGrid is Fun")));
 
         $(".email").click();
         Thread.sleep(100); // because await() is broken
 
         assertExists($("dd", withText("sendgrid@example.com")));
-        assertExists($("dd", withText("featuretest@example.com")));
+        assertExists($("dd", withText("featuretest@example.com, anotherto@example.com")));
         assertExists($("dd", withText("Sending with SendGrid is Fun")));
         assertExists($(".email-detail--body", withText("B0dy")));
     }
@@ -64,6 +64,10 @@ public class HappyPathTest extends FluentTest {
         Email to = new Email("featuretest@example.com");
         Content content = new Content("text/plain", "B0dy");
         Mail mail = new Mail(from, subject, to, content);
+
+        Personalization personalization = new Personalization();
+        personalization.addTo(new Email("anotherto@example.com"));
+        mail.addPersonalization(personalization);
 
         SendGrid sg = new SendGrid("1234", true);
         sg.setHost(hostname + ":" + port + "/eapi/sendgrid");
