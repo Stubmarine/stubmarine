@@ -3,4 +3,4 @@ applications:
 - name: wallraff
   memory: 2G
   buildpack: java_buildpack
-  path: backend/build/libs/backend-0.1.0-SNAPSHOT.jar
+  path: dist/backend-0.1.0-SNAPSHOT.jar

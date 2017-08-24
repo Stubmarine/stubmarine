@@ -2,12 +2,24 @@ task testAll() {
     dependsOn = [":backend:test", ":featuretest:test"]
 }
 
+task cleanFrontEnd(type:Delete) {
+    delete "backend/src/main/resources/static"
+}
+
 task copyFrontEnd(type:Copy) {
     from "frontend/dist"
     into "backend/src/main/resources/static"
 }
-copyFrontEnd.dependsOn(":frontend:build")
+copyFrontEnd.dependsOn("cleanFrontEnd", ":frontend:build")
 
-task buildUberJar() {
+task cleanDist(type:Delete) {
+    delete "dist"
 }
-buildUberJar.dependsOn("copyFrontEnd", ":backend:clean", ":backend:build", ":backend:jar")
+
+task buildUberJar(type:Copy) {
+    from("backend/build/libs") {
+        include '*.jar'
+    }
+    into "dist"
+}
+buildUberJar.dependsOn("copyFrontEnd", ":backend:clean", ":backend:build")

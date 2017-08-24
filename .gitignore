@@ -11,3 +11,4 @@ featuretest/out
 featuretest/target
 .gradle
 featuretest/build/
+dist/
