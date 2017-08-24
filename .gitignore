@@ -12,3 +12,4 @@ featuretest/target
 .gradle
 featuretest/build/
 dist/
+misc/misc.iml

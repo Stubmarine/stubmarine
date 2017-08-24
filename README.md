@@ -13,9 +13,7 @@ Simulate email universe that assists in development of software.
 
 ### Start Application
 
-1. Start the backend by:
-    1. `cd backend`
-    1. `./gradew bootRun`
+1. Start the backend via`./gradew :backend:bootRun`
 1. Start the frontend by:
     1. `cd frontend`
     1. `yarn start`
