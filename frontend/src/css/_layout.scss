@@ -30,8 +30,19 @@
   padding-right: 0.5rem;
 
   font-size: 1rem;
-  color: $white;
+  color: rgba($white, 0.7);
   font-weight: 300;
+
+  cursor: pointer;
+
+  &__active {
+    font-weight: 400;
+    color: $white;
+  }
+
+  :hover {
+    color: white;
+  }
 }
 
 .page-content {

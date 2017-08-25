@@ -14,6 +14,8 @@ update msg model =
   case msg of
     HelloWorld ->
       ( model, Cmd.none )
+    ChangeRoute target ->
+      ( { model | route = target }, Cmd.none )
     UpdateEmails response ->
       ( { model | emails = response }, Cmd.none )
     UpdateEmail response ->

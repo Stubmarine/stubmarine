@@ -80,3 +80,44 @@ body {
     font-family: $mono-font-family;
   }
 }
+
+.endpoint-pane {
+  display: flex;
+}
+
+.endpoint-list {
+  flex: 1;
+  margin-left: $standard-spacing / 2;
+  margin-right: $standard-spacing / 2;
+}
+
+.endpoint {
+  padding: $standard-spacing;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  background-color: $white;
+  margin-bottom: -1px;
+
+  &:first-child {
+    border-top-right-radius: $radius;
+    border-top-left-radius: $radius;
+  }
+
+  &:last-child {
+    border-bottom-right-radius: $radius;
+    border-bottom-left-radius: $radius;
+  }
+}
+
+.endpoint-desc {
+  margin-top: 0.5 * $standard-spacing;
+  margin-bottom: 0.1 * $standard-spacing;
+}
+
+.endpoint-url {
+  font-family: $mono-font-family;
+  margin-left: 0.5 * $standard-spacing;
+}
+
+.endpoint-desc, .endpoint-url {
+  display: block;
+}

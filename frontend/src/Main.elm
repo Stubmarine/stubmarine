@@ -2,7 +2,7 @@ import Html exposing (programWithFlags)
 import RemoteData exposing (RemoteData(..))
 
 import Message exposing (Msg)
-import Model exposing (Model)
+import Model exposing (Model, Route(Emails))
 import Subscriptions exposing (subscriptions)
 import Update exposing (update, fetchEmailList)
 import View exposing (view)
@@ -12,7 +12,7 @@ type alias Flags =
   }
 
 init : Flags -> ( Model, Cmd Msg )
-init flags = ( Model flags.wsapiBasePath Loading NotAsked, fetchEmailList )
+init flags = ( Model flags.wsapiBasePath Emails Loading NotAsked, fetchEmailList )
 
 main : Program Flags Model Msg
 main =

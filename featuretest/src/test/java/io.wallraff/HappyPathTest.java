@@ -17,10 +17,11 @@ import static org.fluentlenium.core.filter.FilterConstructor.withText;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = WallraffApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = WallraffApplication.class, webEnvironment = RANDOM_PORT)
 public class HappyPathTest extends FluentTest {
 
     @LocalServerPort
@@ -56,6 +57,20 @@ public class HappyPathTest extends FluentTest {
         assertExists($("dd", withText("featuretest@example.com, anotherto@example.com")));
         assertExists($("dd", withText("Sending with SendGrid is Fun")));
         assertExists($(".email-detail--body", withText("B0dy")));
+    }
+
+    @Test
+    public void testEndpointInformation() throws Exception {
+        goTo("http://" + hostname + ":" + port);
+
+        $(".nav-item a", withText("Endpoints")).click();
+        Thread.sleep(100); // why I have to do this?!?
+
+        assertExists($("h3", withText("SendGrid")));
+        assertExists($("span", withText("https://api.sendgrid.com")));
+        assertExists($("span", withText("https://wallraff.cfapps.io/eapi/sendgrid")));
+        assertExists($("span", withText("POST https://wallraff.cfapps.io/eapi/sendgrid/v3/mail/send <data>")));
+
     }
 
     private Response sendEmailUsingSendgrid() throws Exception {

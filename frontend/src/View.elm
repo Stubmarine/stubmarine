@@ -1,7 +1,7 @@
 module View exposing (view)
 
-import Html exposing (Html, div, text, dd, dt, dl, hr, span, ul, li)
-import Html.Attributes exposing (class)
+import Html exposing (Html, a, div, text, dd, dt, dl, h3, hr, span, ul, li)
+import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 
 import RemoteData exposing (RemoteData(..))
@@ -17,8 +17,8 @@ viewEmailListItem email =
     , div [] [ text "Subject: ", text email.subject ]
     ]
 
-view : Model -> Html Msg
-view model =
+viewEmailPage : Model -> Html Msg
+viewEmailPage model =
   let
     emails = case model.emails of
       Success emailsList ->
@@ -50,17 +50,69 @@ view model =
       Failure err ->
         [ div [ class "email-detail" ] [ text "Error" ] ]
   in
+    div [ class "page-content" ]
+      [ div [ class "email-pane" ] (emailList ++ emailDetail)
+      ]
 
+viewEndpointsPage : Model -> Html Msg
+viewEndpointsPage model =
+  div [ class "page-content" ]
+    [ div [ class "endpoint-pane" ]
+      [ div [ class "endpoint-list" ]
+        [ div [ class "endpoint" ]
+          [ h3 [] [ text "SendGrid" ]
+          , div []
+            [ span [ class "endpoint-desc" ] [ text "Originally (and in production) your host is configured as..." ]
+            , span [ class "endpoint-url"] [ text "https://api.sendgrid.com" ]
+            ]
+          , div []
+            [ span [ class "endpoint-desc" ] [ text "Configure your non-production environments to use..." ]
+            , span [ class "endpoint-url" ] [ text "https://wallraff.cfapps.io/eapi/sendgrid" ]
+            ]
+          , div []
+            [ span [ class "endpoint-desc" ] [ text "An example usage would look like this..." ]
+            , span [ class "endpoint-url" ] [ text "POST https://wallraff.cfapps.io/eapi/sendgrid/v3/mail/send <data>" ]
+            ]
+          ]
+        ]
+      ]
+    ]
+
+viewNavItem : Route -> Route -> Html Msg
+viewNavItem current target =
+  let
+    label = case target of
+      Emails ->
+        "Emails"
+      Endpoints ->
+        "Endpoints"
+    classes =
+      [ ("nav-item", True)
+      , ("nav-item__active", target == current)
+      ]
+  in
+    li [ classList classes ] [ a [ onClick (ChangeRoute target) ] [ text label ]]
+
+view : Model -> Html Msg
+view model =
+  let
+    pageContent = case model.route of
+      Emails ->
+        viewEmailPage model
+      Endpoints ->
+        viewEndpointsPage model
+
+    navItem = viewNavItem model.route
+  in
     div []
       [ div [ class "nav-bar" ]
         [ div [ class "container container__nav" ]
           [ div [ class "logo" ] [ text "Wallraff" ]
           , ul [ class "nav" ]
-            [ li [ class "nav-item" ] [ text "Emails"]
+            [ navItem Emails
+            , navItem Endpoints
             ]
           ]
         ]
-      , div [ class "page-content" ]
-          [ div [ class "email-pane" ] (emailList ++ emailDetail)
-          ]
+      , pageContent
       ]

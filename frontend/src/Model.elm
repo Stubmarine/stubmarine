@@ -4,9 +4,12 @@ import RemoteData exposing (WebData)
 
 type alias Model =
   { wsapiBasePath: String
+  , route: Route
   , emails: WebData EmailList
   , email: WebData Email
   }
+
+type Route = Emails | Endpoints
 
 type alias EmailId = Int
 
