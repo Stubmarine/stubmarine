@@ -54,29 +54,40 @@ viewEmailPage model =
       [ div [ class "email-pane" ] (emailList ++ emailDetail)
       ]
 
-viewEndpointsPage : Model -> Html Msg
-viewEndpointsPage model =
-  div [ class "page-content" ]
-    [ div [ class "endpoint-pane" ]
-      [ div [ class "endpoint-list" ]
-        [ div [ class "endpoint" ]
-          [ h3 [] [ text "SendGrid" ]
-          , div []
-            [ span [ class "endpoint-desc" ] [ text "Originally (and in production) your host is configured as..." ]
-            , span [ class "endpoint-url"] [ text "https://api.sendgrid.com" ]
-            ]
-          , div []
-            [ span [ class "endpoint-desc" ] [ text "Configure your non-production environments to use..." ]
-            , span [ class "endpoint-url" ] [ text "https://wallraff.cfapps.io/eapi/sendgrid" ]
-            ]
-          , div []
-            [ span [ class "endpoint-desc" ] [ text "An example usage would look like this..." ]
-            , span [ class "endpoint-url" ] [ text "POST https://wallraff.cfapps.io/eapi/sendgrid/v3/mail/send <data>" ]
-            ]
-          ]
-        ]
+viewEndpoint : Endpoint -> Html Msg
+viewEndpoint endpoint =
+  div [ class "endpoint" ]
+    [ h3 [] [ text endpoint.name ]
+    , div []
+      [ span [ class "endpoint-desc" ] [ text "Originally (and in production) your host is configured as..." ]
+      , span [ class "endpoint-url"] [ text endpoint.originalHost ]
+      ]
+    , div []
+      [ span [ class "endpoint-desc" ] [ text "Configure your non-production environments to use..." ]
+      , span [ class "endpoint-url" ] [ text endpoint.newHost ]
+      ]
+    , div []
+      [ span [ class "endpoint-desc" ] [ text "An example usage would look like this..." ]
+      , span [ class "endpoint-url" ] [ text endpoint.example ]
       ]
     ]
+
+viewEndpointsPage : Model -> Html Msg
+viewEndpointsPage model =
+  let
+    content = case model.endpoints of
+      Success endpoints ->
+        List.map viewEndpoint endpoints
+      Loading ->
+        [ div [] [ text "Loading..." ] ]
+      _ ->
+        []
+  in
+    div [ class "page-content" ]
+      [ div [ class "endpoint-pane" ]
+        [ div [ class "endpoint-list" ] content
+        ]
+      ]
 
 viewNavItem : Route -> Route -> Html Msg
 viewNavItem current target =

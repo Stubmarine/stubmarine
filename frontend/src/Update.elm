@@ -16,12 +16,21 @@ update msg model =
       ( model, Cmd.none )
     ChangeRoute target ->
       ( { model | route = target }, Cmd.none )
+
+    FetchEmails ->
+      ( { model | emails = Loading }, fetchEmailList )
     UpdateEmails response ->
       ( { model | emails = response }, Cmd.none )
     UpdateEmail response ->
       ( { model | email = response }, Cmd.none )
     SelectEmail id ->
       ( model, fetchEmail id )
+
+    FetchEndpoints ->
+      ( { model | endpoints = Loading }, fetchEndpointList )
+    UpdateEndpoints response ->
+      ( { model | endpoints = response }, Cmd.none )
+
     WSEmailsMessage newEmailStr ->
       let
         newEmailResult = Decode.decodeString decodeEmail newEmailStr
@@ -77,3 +86,30 @@ fetchEmail id =
     }
     |> RemoteData.sendRequest
     |> Cmd.map UpdateEmail
+
+decodeEndpoints : Decode.Decoder EndpointList
+decodeEndpoints =
+  Decode.list decodeEndpoint
+
+decodeEndpoint : Decode.Decoder Endpoint
+decodeEndpoint =
+  Decode.succeed Endpoint
+    |: (Decode.field "id" Decode.string)
+    |: (Decode.field "name" Decode.string)
+    |: (Decode.field "originalHost" Decode.string)
+    |: (Decode.field "newHost" Decode.string)
+    |: (Decode.field "example" Decode.string)
+
+fetchEndpointList : Cmd Msg
+fetchEndpointList =
+  Http.request
+    { method = "GET"
+    , headers = [ ]
+    , url = "/api/endpoints"
+    , body = Http.emptyBody
+    , expect = Http.expectJson decodeEndpoints
+    , timeout = Nothing
+    , withCredentials = False
+    }
+    |> RemoteData.sendRequest
+    |> Cmd.map UpdateEndpoints
