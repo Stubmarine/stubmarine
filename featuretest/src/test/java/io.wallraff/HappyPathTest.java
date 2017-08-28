@@ -49,6 +49,10 @@ public class HappyPathTest extends FluentTest {
         assertThat(window().title(), equalTo("Wallraff"));
         assertThat($(".logo").text(), equalTo("Wallraff"));
 
+        // Select an inbox
+        $("#inbox-name").fill().with("demo");
+        $("button", withText("Continue")).click();
+
         $(".nav-item a", withText("Endpoints")).click();
         Thread.sleep(6100); // why I have to do this?!?
 

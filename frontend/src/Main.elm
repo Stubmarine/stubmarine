@@ -2,8 +2,8 @@ import Html exposing (programWithFlags)
 import RemoteData exposing (RemoteData(..))
 import Task
 
-import Message exposing (Msg, Msg(FetchEmails, FetchEndpoints))
-import Model exposing (Model, Route(Emails))
+import Message exposing (Msg)
+import Model exposing (Model, Route(Landing))
 import Subscriptions exposing (subscriptions)
 import Update exposing (update, fetchEmailList)
 import View exposing (view)
@@ -21,7 +21,8 @@ send msg =
 initModel : Flags -> Model
 initModel flags =
   { wsapiBasePath = flags.wsapiBasePath
-  , route = Emails
+  , route = Landing
+  , inboxName = "example"
   , emails = NotAsked
   , email = NotAsked
   , endpoints = NotAsked
@@ -29,10 +30,7 @@ initModel flags =
 
 initMsg : Cmd Msg
 initMsg =
-  Cmd.batch
-    [ send FetchEmails
-    , send FetchEndpoints
-    ]
+  Cmd.none
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =

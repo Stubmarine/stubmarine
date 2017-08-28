@@ -33,4 +33,10 @@ public class SendGridTokenVerifierTest {
         String bazIssuedToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJCYXoifQ.7AtT3CAb-LMVpMrrjFyIZVYAC5y_dwlNpdnyXyY1nG4";
         assertFalse(verifier.verify(bazIssuedToken));
     }
+
+    @Test
+    public void testExtractInbox() throws Exception {
+        String inboxClaimOfPuppyToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJXYWxscmFmZiIsImlhdCI6MTUwNDA0NzE1MiwiZXhwIjpudWxsLCJhdWQiOiIiLCJzdWIiOiIiLCJpbmJveCI6InB1cHB5In0.OcRhAfCbYM9VQ_-obCdsF-n3j_2hWq7V5d1VXRO36zk";
+        assertEquals(verifier.extractInbox(inboxClaimOfPuppyToken), "puppy");
+    }
 }

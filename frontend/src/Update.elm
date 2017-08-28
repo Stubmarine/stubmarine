@@ -12,22 +12,29 @@ import Model exposing (..)
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
-    HelloWorld ->
-      ( model, Cmd.none )
+    FormInputInboxName inboxName ->
+      ( { model | inboxName = inboxName}, Cmd.none )
+
     ChangeRoute target ->
       ( { model | route = target }, Cmd.none )
 
-    FetchEmails ->
-      ( { model | emails = Loading }, fetchEmailList )
+    SelectInbox inboxName ->
+      ( model, Cmd.none )
+      -- Fetch emails
+        |> \(m, c) -> ( { m | emails = Loading, email = NotAsked }, Cmd.batch [c, fetchEmailList inboxName] )
+      -- Fetch endpoints
+        |> \(m, c) -> ( { m | endpoints = Loading }, Cmd.batch [c, fetchEndpointList inboxName] )
+      -- change route
+        |> \(m, c) -> ( { m | route = Inbox inboxName Emails }, c )
+
     UpdateEmails response ->
       ( { model | emails = response }, Cmd.none )
-    UpdateEmail response ->
-      ( { model | email = response }, Cmd.none )
+
     SelectEmail id ->
       ( model, fetchEmail id )
+    UpdateEmail response ->
+      ( { model | email = response }, Cmd.none )
 
-    FetchEndpoints ->
-      ( { model | endpoints = Loading }, fetchEndpointList )
     UpdateEndpoints response ->
       ( { model | endpoints = response }, Cmd.none )
 
@@ -59,12 +66,12 @@ decodeEmail =
     |: (Decode.field "subject" Decode.string)
     |: (Decode.field "body" Decode.string)
 
-fetchEmailList : Cmd Msg
-fetchEmailList =
+fetchEmailList : InboxName -> Cmd Msg
+fetchEmailList inboxName =
   Http.request
     { method = "GET"
     , headers = [ ]
-    , url = "/api/emails"
+    , url = "/api/inbox/" ++ inboxName ++ "/emails"
     , body = Http.emptyBody
     , expect = Http.expectJson decodeEmails
     , timeout = Nothing
@@ -101,12 +108,12 @@ decodeEndpoint =
     |: (Decode.field "newToken" Decode.string)
     |: (Decode.field "example" Decode.string)
 
-fetchEndpointList : Cmd Msg
-fetchEndpointList =
+fetchEndpointList : InboxName -> Cmd Msg
+fetchEndpointList inboxName =
   Http.request
     { method = "GET"
     , headers = [ ]
-    , url = "/api/endpoints"
+    , url = "/api/inbox/" ++ inboxName ++ "/endpoints"
     , body = Http.emptyBody
     , expect = Http.expectJson decodeEndpoints
     , timeout = Nothing

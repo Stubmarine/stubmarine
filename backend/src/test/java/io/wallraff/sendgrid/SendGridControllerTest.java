@@ -20,10 +20,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SendgridControllerTest {
+public class SendGridControllerTest {
 
     @InjectMocks
-    private SendgridController controller;
+    private SendGridController controller;
 
     @Mock
     private EmailRepository emailRepository;
@@ -49,10 +49,12 @@ public class SendgridControllerTest {
                 "sender@example.com",
                 "to@example.com",
                 "My subjecT",
-                "Content content content!"
+                "Content content content!",
+                "zoo"
         ))).thenReturn(savedRecord);
 
         when(sendGridTokenVerifier.verify(any())).thenReturn(true);
+        when(sendGridTokenVerifier.extractInbox(any())).thenReturn("zoo");
 
         String content = "" +
                 "{" +
@@ -86,6 +88,7 @@ public class SendgridControllerTest {
         verify(emailWebSocketHandler).broadcastNewEmailMessage(savedRecord);
 
         verify(sendGridTokenVerifier).verify("foobar");
+        verify(sendGridTokenVerifier).extractInbox("foobar");
     }
 
     @Test
@@ -96,10 +99,12 @@ public class SendgridControllerTest {
                 "sender@example.com",
                 "to1@example.com, to2@example.com, to3@example.com",
                 "My subjecT",
-                "Content content content!"
+                "Content content content!",
+                "zoo"
         ))).thenReturn(savedRecord);
 
         when(sendGridTokenVerifier.verify(any())).thenReturn(true);
+        when(sendGridTokenVerifier.extractInbox(any())).thenReturn("zoo");
 
         String content = "" +
                 "{" +
@@ -138,15 +143,6 @@ public class SendgridControllerTest {
 
     @Test
     public void testMailSend_InvalidToken() throws Exception {
-        EmailRecord savedRecord = mock(EmailRecord.class);
-        when(emailRepository.save(new EmailRecord(
-                null,
-                "sender@example.com",
-                "to@example.com",
-                "My subjecT",
-                "Content content content!"
-        ))).thenReturn(savedRecord);
-
         when(sendGridTokenVerifier.verify(any())).thenReturn(false);
 
         String content = "" +
@@ -180,6 +176,8 @@ public class SendgridControllerTest {
 
         verifyZeroInteractions(emailRepository);
         verifyZeroInteractions(emailWebSocketHandler);
+
+        verify(sendGridTokenVerifier, times(0)).extractInbox(any());
     }
 
     @Test

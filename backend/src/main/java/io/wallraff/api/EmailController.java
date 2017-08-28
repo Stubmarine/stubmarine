@@ -3,7 +3,6 @@ package io.wallraff.api;
 import io.wallraff.data.EmailRepository;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -21,9 +20,11 @@ public class EmailController {
         this.emailRepository = emailRepository;
     }
 
-    @RequestMapping("/api/emails")
-    public List list() {
-        return asStream(emailRepository.findAll()).collect(toList());
+    @RequestMapping("/api/inbox/{inboxName}/emails")
+    public List list(
+            @PathVariable("inboxName") String inboxName
+    ) {
+        return asStream(emailRepository.findByInbox(inboxName)).collect(toList());
     }
 
     @RequestMapping("/api/emails/{id}")

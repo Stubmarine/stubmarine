@@ -16,6 +16,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static java.util.Arrays.asList;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -38,12 +40,12 @@ public class EmailControllerTest {
 
     @Test
     public void testList() throws Exception {
-        when(emailRepository.findAll()).thenReturn(asList(
-                new EmailRecord(1, "foo", "bar", "baz", "zar"),
-                new EmailRecord(22, "foo2", "bar2", "baz2", "zar2")
+        when(emailRepository.findByInbox(any())).thenReturn(asList(
+                new EmailRecord(1, "foo", "bar", "baz", "zar", "zoo"),
+                new EmailRecord(22, "foo2", "bar2", "baz2", "zar2", "zoo2")
         ));
 
-        ResultActions resultActions = mockMvc.perform(get("/api/emails").contentType(MediaType.APPLICATION_JSON));
+        ResultActions resultActions = mockMvc.perform(get("/api/inbox/larry/emails").contentType(MediaType.APPLICATION_JSON));
 
         resultActions
                 .andExpect(status().isOk())
@@ -57,12 +59,14 @@ public class EmailControllerTest {
                 .andExpect(jsonPath("$[0].body", equalTo("zar")))
 
                 .andExpect(jsonPath("$[1].id", equalTo(22)));
+
+        verify(emailRepository).findByInbox("larry");
     }
 
     @Test
     public void testGet() throws Exception {
         when(emailRepository.findOne(1))
-                .thenReturn(new EmailRecord(1, "foo", "bar", "baz", "zar"));
+                .thenReturn(new EmailRecord(1, "foo", "bar", "baz", "zar", "zoo"));
 
         ResultActions resultActions = mockMvc.perform(get("/api/emails/1").contentType(MediaType.APPLICATION_JSON));
 

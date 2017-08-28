@@ -15,7 +15,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Component
 public class EmailWebSocketHandler extends TextWebSocketHandler {
 
-    private List<WebSocketSession> sessions = new CopyOnWriteArrayList<WebSocketSession>();
+    private final List<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
+    private final EmailWebSocketRoute emailWebSocketRoute;
+
+    public EmailWebSocketHandler(EmailWebSocketRoute emailWebSocketRoute) {
+        this.emailWebSocketRoute = emailWebSocketRoute;
+    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -30,8 +35,12 @@ public class EmailWebSocketHandler extends TextWebSocketHandler {
     public void broadcastNewEmailMessage(EmailRecord email) throws IOException {
         final String content = new ObjectMapper().writeValueAsString(email);
 
-        for(WebSocketSession webSocketSession : sessions) {
-            webSocketSession.sendMessage(new TextMessage(content));
+        for (WebSocketSession webSocketSession : sessions) {
+            String inbox = emailWebSocketRoute.extractInboxName(webSocketSession.getUri());
+            if (email.getInbox().equals(inbox)) {
+                webSocketSession.sendMessage(new TextMessage(content));
+            }
         }
     }
+
 }

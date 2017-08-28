@@ -5,16 +5,16 @@ import RemoteData exposing (WebData)
 import Model exposing (EmailList, EmailId, Email, EndpointList, Route)
 
 type Msg
-  = HelloWorld
-  | ChangeRoute Route
+  = FormInputInboxName String
 
-  | FetchEmails
+  | ChangeRoute Route
+  | SelectInbox String
+
   | UpdateEmails (WebData EmailList)
 
   | SelectEmail EmailId
   | UpdateEmail (WebData Email)
 
-  | FetchEndpoints
   | UpdateEndpoints (WebData EndpointList)
 
   | WSEmailsMessage String

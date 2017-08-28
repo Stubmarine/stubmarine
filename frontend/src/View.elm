@@ -1,13 +1,35 @@
 module View exposing (view)
 
-import Html exposing (Html, a, div, text, dd, dt, dl, h3, hr, span, ul, li)
-import Html.Attributes exposing (class, classList)
-import Html.Events exposing (onClick)
+import Html exposing (Html, a, button, div, form, input, text, dd, dt, dl, h3, hr, span, ul, li)
+import Html.Attributes exposing (class, classList, defaultValue, disabled, id, placeholder, type_)
+import Html.Events exposing (onClick, onInput, onSubmit)
 
 import RemoteData exposing (RemoteData(..))
 
 import Model exposing (..)
 import Message exposing (..)
+
+viewLandingPage : Model -> Html Msg
+viewLandingPage model =
+  let
+    isValid = isValidInboxName model.inboxName
+
+    formAttrs = if isValid then
+        [ onSubmit (SelectInbox model.inboxName) ]
+      else
+        [ ]
+  in
+    div [ class "page-content" ]
+      [ div [ class "inboxes-pane" ]
+        [ div [ class "inbox-create" ]
+          [ span [ class "instruction" ] [ text "Select an inbox to continue" ]
+          , form formAttrs
+            [ input [ id "inbox-name", type_ "text", defaultValue model.inboxName, placeholder "Inbox name", onInput FormInputInboxName ] []
+            , button [ type_ "submit", disabled (not isValid) ] [ text "Continue" ]
+            ]
+          ]
+        ]
+      ]
 
 viewEmailListItem : Email -> Html Msg
 viewEmailListItem email =
@@ -17,8 +39,8 @@ viewEmailListItem email =
     , div [] [ text "Subject: ", text email.subject ]
     ]
 
-viewEmailPage : Model -> Html Msg
-viewEmailPage model =
+viewEmailsPage : Model -> Html Msg
+viewEmailsPage model =
   let
     emails = case model.emails of
       Success emailsList ->
@@ -50,9 +72,7 @@ viewEmailPage model =
       Failure err ->
         [ div [ class "email-detail" ] [ text "Error" ] ]
   in
-    div [ class "page-content" ]
-      [ div [ class "email-pane" ] (emailList ++ emailDetail)
-      ]
+    div [ class "email-pane" ] (emailList ++ emailDetail)
 
 viewEndpoint : Endpoint -> Html Msg
 viewEndpoint endpoint =
@@ -91,46 +111,57 @@ viewEndpointsPage model =
       _ ->
         []
   in
-    div [ class "page-content" ]
-      [ div [ class "endpoint-pane" ]
-        [ div [ class "endpoint-list" ] content
-        ]
+    div [ class "endpoint-pane" ]
+      [ div [ class "endpoint-list" ] content
       ]
 
-viewNavItem : Route -> Route -> Html Msg
-viewNavItem current target =
+viewInbox : String -> InboxRoute -> Model -> Html Msg
+viewInbox inboxName subRoute model =
   let
-    label = case target of
+    content = case subRoute of
       Emails ->
-        "Emails"
+        viewEmailsPage model
       Endpoints ->
-        "Endpoints"
-    classes =
-      [ ("nav-item", True)
-      , ("nav-item__active", target == current)
+        viewEndpointsPage model
+
+    navLinkClasses = \target -> classList
+      [ ("nav-link", True)
+      , ("nav-link__active", target == subRoute)
+      ]
+
+    pageNav = div [ class "page-content--nav" ]
+      [ ul [ class "nav" ]
+        [ li [ class "nav-item" ]
+          [ span [ class "nav-link" ] [ text inboxName ]
+          ]
+        , li [ class "nav-item" ]
+          [ a [ navLinkClasses Emails, onClick (ChangeRoute (Inbox inboxName Emails)) ] [ text "Emails" ]
+          ]
+        , li [ class "nav-item" ]
+          [ a [ navLinkClasses Endpoints, onClick (ChangeRoute (Inbox inboxName Endpoints)) ] [ text "Endpoints" ]
+          ]
+        ]
       ]
   in
-    li [ classList classes ] [ a [ onClick (ChangeRoute target) ] [ text label ]]
+    div [ class "page-content" ]
+    [ pageNav
+    , content
+    ]
 
 view : Model -> Html Msg
 view model =
   let
     pageContent = case model.route of
-      Emails ->
-        viewEmailPage model
-      Endpoints ->
-        viewEndpointsPage model
-
-    navItem = viewNavItem model.route
+      Landing ->
+        viewLandingPage model
+      Inbox inboxName subRoute ->
+        viewInbox inboxName subRoute model
   in
     div []
       [ div [ class "nav-bar" ]
         [ div [ class "container container__nav" ]
-          [ div [ class "logo" ] [ text "Wallraff" ]
-          , ul [ class "nav" ]
-            [ navItem Emails
-            , navItem Endpoints
-            ]
+          [ div [ class "logo", onClick (ChangeRoute Landing) ] [ text "Wallraff" ]
+          , ul [ class "nav" ] [ ]
           ]
         ]
       , pageContent

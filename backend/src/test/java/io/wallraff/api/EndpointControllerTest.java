@@ -14,6 +14,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -36,10 +38,10 @@ public class EndpointControllerTest {
 
     @Test
     public void testList() throws Exception {
-        when(sendGridTokenGenerator.generateToken()).thenReturn("SOME_TOKEN");
+        when(sendGridTokenGenerator.generateToken(any())).thenReturn("SOME_TOKEN");
 
         ResultActions result = mockMvc.perform(
-                get("/api/endpoints").contentType(MediaType.APPLICATION_JSON)
+                get("/api/inbox/larry/endpoints").contentType(MediaType.APPLICATION_JSON)
         );
 
         result
@@ -53,5 +55,7 @@ public class EndpointControllerTest {
                 .andExpect(jsonPath("$[0].newToken", equalTo("SOME_TOKEN")))
                 .andExpect(jsonPath("$[0].example", equalTo("POST https://wallraff.cfapps.io/eapi/sendgrid/v3/mail/send <data>")))
                 .andExpect(jsonPath("$[0].*", hasSize(6)));
+
+        verify(sendGridTokenGenerator).generateToken("larry");
     }
 }

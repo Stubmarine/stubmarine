@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 
 @RestController
-public class SendgridController {
+public class SendGridController {
     private final EmailRepository emailRepository;
     private final EmailWebSocketHandler emailWebSocketHandler;
     private final SendGridTokenVerifier sendGridTokenVerifier;
 
-    public SendgridController(
+    public SendGridController(
             EmailRepository emailRepository,
             EmailWebSocketHandler emailWebSocketHandler,
             SendGridTokenVerifier sendGridTokenVerifier
@@ -37,6 +37,8 @@ public class SendgridController {
             return new ResponseEntity<>("", HttpStatus.UNAUTHORIZED);
         }
 
+        String inbox = sendGridTokenVerifier.extractInbox(authorization.substring(7));
+
         EmailRecord newEmail = emailRepository.save(new EmailRecord(
                 null,
                 form.getFrom().getEmail(),
@@ -49,7 +51,8 @@ public class SendgridController {
                         .filter(c -> c.getType().equals("text/plain"))
                         .findFirst()
                         .map(ContentForm::getValue)
-                        .orElse("")
+                        .orElse(""),
+                inbox
         ));
 
         try {
@@ -60,12 +63,12 @@ public class SendgridController {
         return new ResponseEntity<>("", HttpStatus.ACCEPTED);
     }
 
-    private boolean checkAuthentication(@RequestHeader String authentication) {
-        if (authentication == null || !authentication.startsWith("Bearer ")) {
+    private boolean checkAuthentication(@RequestHeader String authorization) {
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
             return false;
         }
 
-        String token = authentication.substring(7);
+        String token = authorization.substring(7);
 
         return sendGridTokenVerifier.verify(token);
     }

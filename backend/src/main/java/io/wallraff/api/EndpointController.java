@@ -1,6 +1,7 @@
 package io.wallraff.api;
 
 import io.wallraff.sendgrid.SendGridTokenGenerator;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,15 +20,17 @@ public class EndpointController {
         this.sendGridTokenGenerator = sendGridTokenGenerator;
     }
 
-    @RequestMapping("/api/endpoints")
-    public List list() {
+    @RequestMapping("/api/inbox/{inboxName}/endpoints")
+    public List list(
+            @PathVariable("inboxName") String inbox
+    ) {
         return asList(
                 new EndpointListItem(
                         "sendgrid",
                         "SendGrid",
                         "https://api.sendgrid.com",
                         "https://wallraff.cfapps.io/eapi/sendgrid",
-                        sendGridTokenGenerator.generateToken(),
+                        sendGridTokenGenerator.generateToken(inbox),
                         "POST https://wallraff.cfapps.io/eapi/sendgrid/v3/mail/send <data>"
                 )
         );

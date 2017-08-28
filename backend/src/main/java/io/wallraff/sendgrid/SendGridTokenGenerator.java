@@ -26,10 +26,11 @@ public class SendGridTokenGenerator {
         }
     }
 
-    public String generateToken() {
+    public String generateToken(String inbox) {
         try {
             return JWT.create()
                     .withIssuer("Wallraff")
+                    .withClaim("inbox", inbox)
                     .sign(algorithm);
         } catch (JWTCreationException exception) {
             //Invalid Signing configuration / Couldn't convert Claims.
