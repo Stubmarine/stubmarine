@@ -6,29 +6,37 @@ import io.wallraff.data.EmailRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 @RestController
 public class SendgridController {
     private final EmailRepository emailRepository;
     private final EmailWebSocketHandler emailWebSocketHandler;
+    private final SendGridTokenVerifier sendGridTokenVerifier;
 
     public SendgridController(
             EmailRepository emailRepository,
-            EmailWebSocketHandler emailWebSocketHandler
+            EmailWebSocketHandler emailWebSocketHandler,
+            SendGridTokenVerifier sendGridTokenVerifier
     ) {
         this.emailRepository = emailRepository;
         this.emailWebSocketHandler = emailWebSocketHandler;
+        this.sendGridTokenVerifier = sendGridTokenVerifier;
     }
 
     @RequestMapping(path = "/eapi/sendgrid/v3/mail/send")
-    public ResponseEntity mailSend(@RequestBody MailSendForm form) {
+    public ResponseEntity mailSend(
+            @RequestBody MailSendForm form,
+            @RequestHeader(required = false) String authorization
+    ) {
+        if (!checkAuthentication(authorization)) {
+            return new ResponseEntity<>("", HttpStatus.UNAUTHORIZED);
+        }
+
         EmailRecord newEmail = emailRepository.save(new EmailRecord(
                 null,
                 form.getFrom().getEmail(),
@@ -50,5 +58,15 @@ public class SendgridController {
             e.printStackTrace();
         }
         return new ResponseEntity<>("", HttpStatus.ACCEPTED);
+    }
+
+    private boolean checkAuthentication(@RequestHeader String authentication) {
+        if (authentication == null || !authentication.startsWith("Bearer ")) {
+            return false;
+        }
+
+        String token = authentication.substring(7);
+
+        return sendGridTokenVerifier.verify(token);
     }
 }

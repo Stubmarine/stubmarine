@@ -31,6 +31,9 @@ public class SendgridControllerTest {
     @Mock
     private EmailWebSocketHandler emailWebSocketHandler;
 
+    @Mock
+    private SendGridTokenVerifier sendGridTokenVerifier;
+
     private MockMvc mockMvc;
 
     @Before
@@ -48,6 +51,8 @@ public class SendgridControllerTest {
                 "My subjecT",
                 "Content content content!"
         ))).thenReturn(savedRecord);
+
+        when(sendGridTokenVerifier.verify(any())).thenReturn(true);
 
         String content = "" +
                 "{" +
@@ -70,6 +75,7 @@ public class SendgridControllerTest {
                 post("/eapi/sendgrid/v3/mail/send")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content)
+                        .header("Authorization", "Bearer foobar")
         );
 
 
@@ -78,6 +84,8 @@ public class SendgridControllerTest {
                 .andExpect(content().string(""));
 
         verify(emailWebSocketHandler).broadcastNewEmailMessage(savedRecord);
+
+        verify(sendGridTokenVerifier).verify("foobar");
     }
 
     @Test
@@ -90,6 +98,8 @@ public class SendgridControllerTest {
                 "My subjecT",
                 "Content content content!"
         ))).thenReturn(savedRecord);
+
+        when(sendGridTokenVerifier.verify(any())).thenReturn(true);
 
         String content = "" +
                 "{" +
@@ -119,9 +129,127 @@ public class SendgridControllerTest {
                 post("/eapi/sendgrid/v3/mail/send")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content)
+                        .header("Authorization", "Bearer foobar")
         );
 
 
         verify(emailWebSocketHandler).broadcastNewEmailMessage(savedRecord);
+    }
+
+    @Test
+    public void testMailSend_InvalidToken() throws Exception {
+        EmailRecord savedRecord = mock(EmailRecord.class);
+        when(emailRepository.save(new EmailRecord(
+                null,
+                "sender@example.com",
+                "to@example.com",
+                "My subjecT",
+                "Content content content!"
+        ))).thenReturn(savedRecord);
+
+        when(sendGridTokenVerifier.verify(any())).thenReturn(false);
+
+        String content = "" +
+                "{" +
+                "  \"personalizations\": [{" +
+                "    \"to\": [{" +
+                "      \"email\": \"to@example.com\"" +
+                "    }]" +
+                "  }]," +
+                "  \"subject\": \"My subjecT\"," +
+                "  \"from\": {" +
+                "    \"email\": \"sender@example.com\"" +
+                "  }," +
+                "  \"content\": [{" +
+                "    \"type\": \"text/plain\"," +
+                "    \"value\": \"Content content content!\"" +
+                "  }]" +
+                "}";
+
+        ResultActions resultActions = mockMvc.perform(
+                post("/eapi/sendgrid/v3/mail/send")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content)
+                        .header("Authorization", "Bearer foobar")
+        );
+
+
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string(""));
+
+        verifyZeroInteractions(emailRepository);
+        verifyZeroInteractions(emailWebSocketHandler);
+    }
+
+    @Test
+    public void testMailSend_NonBearerAuthorization() throws Exception {
+        String content = "" +
+                "{" +
+                "  \"personalizations\": [{" +
+                "    \"to\": [{" +
+                "      \"email\": \"to@example.com\"" +
+                "    }]" +
+                "  }]," +
+                "  \"subject\": \"My subjecT\"," +
+                "  \"from\": {" +
+                "    \"email\": \"sender@example.com\"" +
+                "  }," +
+                "  \"content\": [{" +
+                "    \"type\": \"text/plain\"," +
+                "    \"value\": \"Content content content!\"" +
+                "  }]" +
+                "}";
+
+        ResultActions resultActions = mockMvc.perform(
+                post("/eapi/sendgrid/v3/mail/send")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content)
+                        .header("Authorization", "Basic foo:bar")
+        );
+
+
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string(""));
+
+        verifyZeroInteractions(sendGridTokenVerifier);
+        verifyZeroInteractions(emailRepository);
+        verifyZeroInteractions(emailWebSocketHandler);
+    }
+
+    @Test
+    public void testMailSend_NoAuthorizationHeader() throws Exception {
+        String content = "" +
+                "{" +
+                "  \"personalizations\": [{" +
+                "    \"to\": [{" +
+                "      \"email\": \"to@example.com\"" +
+                "    }]" +
+                "  }]," +
+                "  \"subject\": \"My subjecT\"," +
+                "  \"from\": {" +
+                "    \"email\": \"sender@example.com\"" +
+                "  }," +
+                "  \"content\": [{" +
+                "    \"type\": \"text/plain\"," +
+                "    \"value\": \"Content content content!\"" +
+                "  }]" +
+                "}";
+
+        ResultActions resultActions = mockMvc.perform(
+                post("/eapi/sendgrid/v3/mail/send")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content)
+        );
+
+
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string(""));
+
+        verifyZeroInteractions(sendGridTokenVerifier);
+        verifyZeroInteractions(emailRepository);
+        verifyZeroInteractions(emailWebSocketHandler);
     }
 }

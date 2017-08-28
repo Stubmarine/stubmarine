@@ -98,6 +98,7 @@ decodeEndpoint =
     |: (Decode.field "name" Decode.string)
     |: (Decode.field "originalHost" Decode.string)
     |: (Decode.field "newHost" Decode.string)
+    |: (Decode.field "newToken" Decode.string)
     |: (Decode.field "example" Decode.string)
 
 fetchEndpointList : Cmd Msg

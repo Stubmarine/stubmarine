@@ -29,6 +29,7 @@ type alias Endpoint =
   , name: String
   , originalHost: String
   , newHost: String
+  , newToken: String
   , example: String
   }
 

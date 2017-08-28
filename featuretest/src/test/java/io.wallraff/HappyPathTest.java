@@ -13,15 +13,22 @@ import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.IOException;
+
 import static org.fluentlenium.core.filter.FilterConstructor.withText;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.ACCEPTED;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = WallraffApplication.class, webEnvironment = RANDOM_PORT)
+@SpringBootTest(
+        classes = WallraffApplication.class,
+        webEnvironment = RANDOM_PORT,
+        properties = {"jwtSecret=secret"}
+)
 public class HappyPathTest extends FluentTest {
 
     @LocalServerPort
@@ -36,13 +43,27 @@ public class HappyPathTest extends FluentTest {
     }
 
     @Test()
-    public void testEmailAppears() throws Exception {
+    public void testSendingAnEmailAppears() throws Exception {
         goTo("http://" + hostname + ":" + port);
 
         assertThat(window().title(), equalTo("Wallraff"));
         assertThat($(".logo").text(), equalTo("Wallraff"));
 
-        Response sendEmailResponse = sendEmailUsingSendgrid();
+        $(".nav-item a", withText("Endpoints")).click();
+        Thread.sleep(6100); // why I have to do this?!?
+
+        assertExists($("h3", withText("SendGrid")));
+        assertExists($("span", withText("https://api.sendgrid.com")));
+        assertExists($("span", withText("https://wallraff.cfapps.io/eapi/sendgrid")));
+        assertExists($("span", withText("POST https://wallraff.cfapps.io/eapi/sendgrid/v3/mail/send <data>")));
+        assertExists($("span.token-value"));
+
+        String token = $("span.token-value").textContent();
+
+        $(".nav-item a", withText("Emails")).click();
+        Thread.sleep(100); // why I have to do this?!?
+
+        Response sendEmailResponse = sendEmailUsingSendgrid(token);
 
         assertEquals(sendEmailResponse.getStatusCode(), ACCEPTED.value());
 
@@ -60,20 +81,17 @@ public class HappyPathTest extends FluentTest {
     }
 
     @Test
-    public void testEndpointInformation() throws Exception {
-        goTo("http://" + hostname + ":" + port);
-
-        $(".nav-item a", withText("Endpoints")).click();
-        Thread.sleep(100); // why I have to do this?!?
-
-        assertExists($("h3", withText("SendGrid")));
-        assertExists($("span", withText("https://api.sendgrid.com")));
-        assertExists($("span", withText("https://wallraff.cfapps.io/eapi/sendgrid")));
-        assertExists($("span", withText("POST https://wallraff.cfapps.io/eapi/sendgrid/v3/mail/send <data>")));
-
+    public void testSendingWithIncorrectToken() throws Exception {
+        try {
+            sendEmailUsingSendgrid("INCORRECT_TOKEN");
+        } catch (IOException ioException) {
+            assertEquals("Request returned status Code 401Body:", ioException.getMessage());
+        } catch (Exception ex) {
+            throw ex;
+        }
     }
 
-    private Response sendEmailUsingSendgrid() throws Exception {
+    private Response sendEmailUsingSendgrid(String token) throws Exception {
         Email from = new Email("sendgrid@example.com");
         String subject = "Sending with SendGrid is Fun";
         Email to = new Email("featuretest@example.com");
@@ -84,16 +102,15 @@ public class HappyPathTest extends FluentTest {
         personalization.addTo(new Email("anotherto@example.com"));
         mail.addPersonalization(personalization);
 
-        SendGrid sg = new SendGrid("1234", true);
+        SendGrid sg = new SendGrid(token, true);
         sg.setHost(hostname + ":" + port + "/eapi/sendgrid");
 
         Request request = new Request();
         request.setMethod(Method.POST);
         request.setEndpoint("mail/send");
         request.setBody(mail.build());
-        Response response = sg.api(request);
 
-        return response;
+        return sg.api(request);
     }
 
     private void assertExists(FluentList<FluentWebElement> elements) {
