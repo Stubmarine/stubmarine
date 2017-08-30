@@ -24,7 +24,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry
-                .addHandler(emailWebSocketHandler, emailWebSocketRoute.getEndpointMask())
+                .addHandler(emailWebSocketHandler, emailWebSocketRoute.getPath())
                 .setAllowedOrigins("*");
     }
 }
