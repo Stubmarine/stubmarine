@@ -1,0 +1,54 @@
+@import 'constants';
+
+.form {
+  > * {
+    margin-bottom: 0.5 * $standard-spacing;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  input {
+    display: block;
+    width: 100%;
+    color: #666;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: $radius;
+
+    height: auto;
+    //box-sizing: border-box;
+    padding: 0.75 * $standard-spacing;
+    line-height: 1.25 * $standard-spacing;
+    font-size: 1.25 * $base-font-size;
+  }
+
+  .button-primary {
+    cursor: pointer;
+
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    user-select: none;
+    border: 1px solid $primary-color;
+    border-radius: $radius;
+    padding: 0.75 * $standard-spacing $standard-spacing;
+    font-size: $base-font-size;
+    line-height: 1.25;
+
+    color: #fff;
+    background-color: $primary-color;
+
+    font-size: 1.25 * $standard-spacing;
+    line-height: 1.25 * $standard-spacing;
+  }
+
+  .button-primary:disabled {
+    cursor: inherit;
+
+    background-color: lighten($primary-color, 33);
+    border-color: lighten($primary-color, 33);
+  }
+}

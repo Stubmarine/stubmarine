@@ -15,17 +15,17 @@ viewLandingPage model =
     isValid = isValidInboxName model.inboxName
 
     formAttrs = if isValid then
-        [ onSubmit (SelectInbox model.inboxName) ]
+        [ class "form", onSubmit (SelectInbox model.inboxName) ]
       else
-        [ ]
+        [ class "form" ]
   in
     div [ class "page-content" ]
       [ div [ class "inboxes-pane" ]
         [ div [ class "inbox-create" ]
-          [ span [ class "instruction" ] [ text "Select an inbox to continue" ]
+          [ span [ class "instruction" ] [ text "Choose an inbox" ]
           , form formAttrs
-            [ input [ id "inbox-name", type_ "text", defaultValue model.inboxName, placeholder "Inbox name", onInput FormInputInboxName ] []
-            , button [ type_ "submit", disabled (not isValid) ] [ text "Continue" ]
+            [ input [ id "inbox-name", type_ "text", defaultValue model.inboxName, placeholder "Enter an inbox name", onInput FormInputInboxName ] []
+            , button [ class "button-primary", type_ "submit", disabled (not isValid) ] [ text "Continue" ]
             ]
           ]
         ]

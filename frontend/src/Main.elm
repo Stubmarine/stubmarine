@@ -22,7 +22,7 @@ initModel : Flags -> Model
 initModel flags =
   { wsapiBasePath = flags.wsapiBasePath
   , route = Landing
-  , inboxName = "example"
+  , inboxName = ""
   , emails = NotAsked
   , email = NotAsked
   , endpoints = NotAsked
