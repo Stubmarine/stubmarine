@@ -1,0 +1,26 @@
+@import 'constants';
+@import 'font';
+
+.alert-warning {
+  padding: $standard-spacing;
+  background-color: lighten($warning-color, 50);
+  margin-bottom: -1px;
+
+  border: 1px solid rgba($warning-color, 1);
+  border-radius: $radius;
+
+  color: $warning-color;
+  font-size: $medium-size;
+  font-family: $font-family;
+
+  em {
+    font-style: normal;
+    font-weight: 600;
+    display: inline-block;
+
+    &::after {
+      content: " ";
+      white-space: pre;
+    }
+  }
+}

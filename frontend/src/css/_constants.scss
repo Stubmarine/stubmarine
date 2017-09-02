@@ -4,12 +4,17 @@ $black: #000;
 $primary-color: #3097D1;
 $secondary-color: #555;
 
+$warning-color: #e09710;
+
 $background-color: #f5f8fa;
 $navbar-color: $primary-color;
 
 $base-font-size: 14px;
 
 $standard-spacing: 1rem;
+
+$standard-size: $standard-spacing;
+$medium-size: 1.1 * $standard-size;
 
 $radius: 0.25 * $standard-spacing;
 

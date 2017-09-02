@@ -54,6 +54,8 @@ public class HappyPathTest extends FluentTest {
         $("button", withText("Continue")).click();
         Thread.sleep(100); // why I have to do this?!?
 
+        $(".alert-warning", withText("Inbox is empty.Send an email to one of the endpoints above and it will appear here."));
+
         $(".nav-item a", withText("Endpoints")).click();
         Thread.sleep(100); // why I have to do this?!?
 

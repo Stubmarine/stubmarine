@@ -1,6 +1,6 @@
 module View exposing (view)
 
-import Html exposing (Html, a, button, div, form, input, text, dd, dt, dl, h3, hr, span, ul, li)
+import Html exposing (Html, a, button, div, em ,form, input, text, dd, dt, dl, h3, hr, span, ul, li)
 import Html.Attributes exposing (class, classList, defaultValue, disabled, id, placeholder, type_)
 import Html.Events exposing (onClick, onInput, onSubmit)
 
@@ -45,7 +45,14 @@ viewEmailsPage model =
   let
     emails = case model.emails of
       Success emailsList ->
-        List.map viewEmailListItem emailsList
+        case emailsList of
+          [] ->
+            [ div [ class "alert-warning" ]
+              [ em [] [ text "Inbox is empty." ]
+              , text "Send an email to one of the endpoints above and it will appear here."
+              ]
+            ]
+          _ -> List.map viewEmailListItem emailsList
       Loading ->
         [ div [] [ text "Loading..." ] ]
       _ ->
