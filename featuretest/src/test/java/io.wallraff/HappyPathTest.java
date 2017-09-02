@@ -50,11 +50,12 @@ public class HappyPathTest extends FluentTest {
         assertThat($(".logo").text(), equalTo("Wallraff"));
 
         // Select an inbox
-        $("#inbox-name").fill().with("demo");
+        $("button", withText("Suggest Random Name")).click();
         $("button", withText("Continue")).click();
+        Thread.sleep(100); // why I have to do this?!?
 
         $(".nav-item a", withText("Endpoints")).click();
-        Thread.sleep(6100); // why I have to do this?!?
+        Thread.sleep(100); // why I have to do this?!?
 
         assertExists($("h3", withText("SendGrid")));
         assertExists($("span", withText("https://api.sendgrid.com")));

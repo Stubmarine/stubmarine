@@ -6,8 +6,10 @@ import Model exposing (EmailList, EmailId, Email, EndpointList, Route)
 
 type Msg
   = FormInputInboxName String
+  | GenerateRandomInboxName
 
   | ChangeRoute Route
+
   | SelectInbox String
 
   | UpdateEmails (WebData EmailList)

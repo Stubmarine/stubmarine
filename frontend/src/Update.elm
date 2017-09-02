@@ -1,8 +1,12 @@
 module Update exposing (..)
 
+import Array exposing (fromList)
+import Char
+import List
 import Json.Decode as Decode
 import Json.Decode.Extra exposing ((|:))
 import Http
+import Random
 import RemoteData exposing (sendRequest, RemoteData(..))
 
 import Message exposing (Msg, Msg(..))
@@ -13,7 +17,9 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     FormInputInboxName inboxName ->
-      ( { model | inboxName = inboxName}, Cmd.none )
+      ( { model | inboxName = inboxName }, Cmd.none )
+    GenerateRandomInboxName ->
+      ( model, Random.generate FormInputInboxName randomInboxName )
 
     ChangeRoute target ->
       ( { model | route = target }, Cmd.none )
@@ -52,6 +58,57 @@ update msg model =
             ( { model | emails = (Success (existingEmails ++ [newEmail])) }, Cmd.none )
           _ ->
             ( model, Cmd.none )
+
+randomStringArrayItem : Array.Array String -> Random.Generator String
+randomStringArrayItem items =
+  let
+    index = Random.int 1 ((Array.length items) - 1)
+    getAtIndex = \i -> Maybe.withDefault "" (Array.get i items)
+  in
+    Random.map getAtIndex index
+
+randomInboxName : Random.Generator String
+randomInboxName =
+  let
+    adjectives = fromList
+      [ "purple"
+      , "green"
+      , "blue"
+      , "lively"
+      , "aching"
+      , "tired"
+      , "silky"
+      , "woeful"
+      ]
+
+    nouns = fromList
+      [ "puppy"
+      , "kitten"
+      , "elephant"
+      , "seal"
+      , "lizard"
+      , "hippo"
+      , "squirrel"
+      ]
+
+    adjective = randomStringArrayItem adjectives
+    noun = randomStringArrayItem nouns
+
+    lowerCaseCodes = List.range (Char.toCode 'a') (Char.toCode 'z')
+    upperCaseCodes = List.range (Char.toCode 'A') (Char.toCode 'Z')
+    digitCodes = List.range (Char.toCode '0') (Char.toCode '9')
+
+    alphaNumeric = List.concat [ lowerCaseCodes, upperCaseCodes, digitCodes ]
+      |> List.map Char.fromCode
+      |> List.map String.fromChar
+      |> Array.fromList
+      |> randomStringArrayItem
+
+    alphaNumericString = alphaNumeric
+      |> Random.list 4
+      |> Random.map String.concat
+  in
+    Random.map3 (\s t u -> s ++ "-" ++ t ++ "-" ++ u) adjective noun alphaNumericString
 
 decodeEmails : Decode.Decoder EmailList
 decodeEmails =

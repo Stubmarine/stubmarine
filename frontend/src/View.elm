@@ -25,6 +25,7 @@ viewLandingPage model =
           [ span [ class "instruction" ] [ text "Choose an inbox" ]
           , form formAttrs
             [ input [ id "inbox-name", type_ "text", defaultValue model.inboxName, placeholder "Enter an inbox name", onInput FormInputInboxName ] []
+            , button [ class "button-secondary", type_ "button", onClick GenerateRandomInboxName ] [ text "Suggest Random Name" ]
             , button [ class "button-primary", type_ "submit", disabled (not isValid) ] [ text "Continue" ]
             ]
           ]
