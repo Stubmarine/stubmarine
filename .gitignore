@@ -13,3 +13,7 @@ featuretest/target
 featuretest/build/
 dist/
 misc/misc.iml
+featuretest/gradle/
+featuretest/gradlew
+featuretest/gradlew.bat
+featuretest/snapshots/

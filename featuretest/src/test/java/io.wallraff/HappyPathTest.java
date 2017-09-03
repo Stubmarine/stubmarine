@@ -1,27 +1,21 @@
 package io.wallraff;
 
 import com.sendgrid.*;
-import org.fluentlenium.adapter.junit.FluentTest;
-import org.fluentlenium.core.domain.FluentList;
-import org.fluentlenium.core.domain.FluentWebElement;
+import net.codestory.simplelenium.SeleniumTest;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 
-import static org.fluentlenium.core.filter.FilterConstructor.withText;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.ACCEPTED;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(
@@ -29,62 +23,63 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
         webEnvironment = RANDOM_PORT,
         properties = {"jwtSecret=secret"}
 )
-public class HappyPathTest extends FluentTest {
-
+public class HappyPathTest extends SeleniumTest {
     @LocalServerPort
     private int port;
 
     private final String hostname = "localhost";
 
+    @Before
+    public void beforeEach() {
+        System.setProperty("browser", "chrome");
+    }
+
     @Override
-    public WebDriver newWebDriver() {
-        ChromeOptions chromeOptions = new ChromeOptions();
-        return new ChromeDriver(chromeOptions);
+    protected String getDefaultBaseUrl() {
+        return "http://" + hostname + ":" + port + "/";
     }
 
     @Test()
     public void testSendingAnEmailAppears() throws Exception {
-        goTo("http://" + hostname + ":" + port);
+        goTo(getDefaultBaseUrl());
 
-        assertThat(window().title(), equalTo("Wallraff"));
-        assertThat($(".logo").text(), equalTo("Wallraff"));
+        assertThat(title(), equalTo("Wallraff"));
+        find(".logo").withText("Wallraff").should().exist();
 
         // Select an inbox
-        $("button", withText("Suggest Random Name")).click();
-        $("button", withText("Continue")).click();
-        Thread.sleep(100); // why I have to do this?!?
+        find("button").withText("Suggest Random Name").click();
+        find("button").withText("Continue").click();
 
-        $(".alert-warning", withText("Inbox is empty.Send an email to one of the endpoints above and it will appear here."));
+        find(".alert-warning")
+                .withText("Inbox is empty.Send an email to one of the endpoints above and it will appear here.")
+                .should().exist();
 
-        $(".nav-item a", withText("Endpoints")).click();
-        Thread.sleep(100); // why I have to do this?!?
+        find(".nav-item a").withText("Endpoints").click();
 
-        assertExists($("h3", withText("SendGrid")));
-        assertExists($("span", withText("https://api.sendgrid.com")));
-        assertExists($("span", withText("https://wallraff.cfapps.io/eapi/sendgrid")));
-        assertExists($("span", withText("POST https://wallraff.cfapps.io/eapi/sendgrid/v3/mail/send <data>")));
-        assertExists($("span.token-value"));
+        find("h3").withText("SendGrid").should().exist();
+        find("span").withText("https://api.sendgrid.com").should().exist();
+        find("span").withText("https://wallraff.cfapps.io/eapi/sendgrid").should().exist();
+        find("span").withText("POST https://wallraff.cfapps.io/eapi/sendgrid/v3/mail/send <data>").should().exist();
 
-        String token = $("span.token-value").textContent();
+        find("span.token-value").should().exist();
+        String token = driver().findElementByCssSelector("span.token-value").getText();
 
-        $(".nav-item a", withText("Emails")).click();
-        Thread.sleep(100); // why I have to do this?!?
+        find(".nav-item a").withText("Emails").click();
 
         Response sendEmailResponse = sendEmailUsingSendgrid(token);
 
         assertEquals(sendEmailResponse.getStatusCode(), ACCEPTED.value());
 
-        assertExists($("div", withText("From: sendgrid@example.com")));
-        assertExists($("div", withText("To: featuretest@example.com, anotherto@example.com")));
-        assertExists($("div", withText("Subject: Sending with SendGrid is Fun")));
+        find("div").withText("From: sendgrid@example.com").should().exist();
+        find("div").withText("To: featuretest@example.com, anotherto@example.com").should().exist();
+        find("div").withText("Subject: Sending with SendGrid is Fun").should().exist();
 
-        $(".email").click();
-        Thread.sleep(100); // because await() is broken
+        find(".email").click();
 
-        assertExists($("dd", withText("sendgrid@example.com")));
-        assertExists($("dd", withText("featuretest@example.com, anotherto@example.com")));
-        assertExists($("dd", withText("Sending with SendGrid is Fun")));
-        assertExists($(".email-detail--body", withText("B0dy")));
+        find("dd").withText("sendgrid@example.com").should().exist();
+        find("dd").withText("featuretest@example.com, anotherto@example.com").should().exist();
+        find("dd").withText("Sending with SendGrid is Fun").should().exist();
+        find(".email-detail--body").withText("B0dy");
     }
 
     @Test
@@ -118,9 +113,5 @@ public class HappyPathTest extends FluentTest {
         request.setBody(mail.build());
 
         return sg.api(request);
-    }
-
-    private void assertExists(FluentList<FluentWebElement> elements) {
-        assertEquals(elements.size(), 1);
     }
 }
