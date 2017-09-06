@@ -22,7 +22,7 @@ print("Sending SendGrid email to " + host)
 
 sg = sendgrid.SendGridAPIClient(apikey=token, host=host + "/eapi/sendgrid")
 from_email = Email("test@example.com")
-to_email = Email("adam@example.com")
+to_email = Email("adam@example.com", "Adam")
 subject = "Sending with SendGrid is Fun"
 content = Content("text/plain", "and easy to do anywhere, even with Python")
 mail = Mail(from_email, subject, to_email, content)

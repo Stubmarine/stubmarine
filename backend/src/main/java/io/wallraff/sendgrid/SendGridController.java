@@ -44,7 +44,7 @@ public class SendGridController {
                 form.getFrom().getEmail(),
                 form.getPersonalizations().stream()
                         .flatMap(p -> p.getTo().stream())
-                        .map(AddressForm::getEmail)
+                        .map(SendGridController::toRecipient)
                         .reduce("", (s, s2) -> s + (s.equals("") ? "" : ", ") + s2),
                 form.getSubject(),
                 form.getContent().stream()
@@ -61,6 +61,14 @@ public class SendGridController {
             e.printStackTrace();
         }
         return new ResponseEntity<>("", HttpStatus.ACCEPTED);
+    }
+
+    private static String toRecipient(AddressForm address) {
+        if (address.getName() != null) {
+            return String.format("%s <%s>", address.getName(), address.getEmail());
+        }
+
+        return address.getEmail();
     }
 
     private boolean checkAuthentication(@RequestHeader String authorization) {
