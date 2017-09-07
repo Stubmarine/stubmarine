@@ -41,7 +41,7 @@ public class SendGridController {
 
         EmailRecord newEmail = emailRepository.save(new EmailRecord(
                 null,
-                form.getFrom().getEmail(),
+                toRecipient(form.getFrom()),
                 form.getPersonalizations().stream()
                         .flatMap(p -> p.getTo().stream())
                         .map(SendGridController::toRecipient)

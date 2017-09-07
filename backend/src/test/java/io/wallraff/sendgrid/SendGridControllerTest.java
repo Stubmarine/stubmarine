@@ -146,7 +146,7 @@ public class SendGridControllerTest {
         EmailRecord savedRecord = mock(EmailRecord.class);
         when(emailRepository.save(new EmailRecord(
                 null,
-                "sender@example.com",
+                "The Sender <sender@example.com>",
                 "To Name <to1@example.com>, to2@example.com, Another <to3@example.com>",
                 "My subjecT",
                 "Content content content!",
@@ -173,7 +173,8 @@ public class SendGridControllerTest {
                 "  }]," +
                 "  \"subject\": \"My subjecT\"," +
                 "  \"from\": {" +
-                "    \"email\": \"sender@example.com\"" +
+                "    \"email\": \"sender@example.com\", " +
+                "    \"name\": \"The Sender\"" +
                 "  }," +
                 "  \"content\": [{" +
                 "    \"type\": \"text/plain\"," +

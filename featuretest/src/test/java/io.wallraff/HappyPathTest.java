@@ -70,7 +70,7 @@ public class HappyPathTest extends SeleniumTest {
 
         assertEquals(sendEmailResponse.getStatusCode(), ACCEPTED.value());
 
-        find("div").withText("From: sendgrid@example.com").should().exist();
+        find("div").withText("From: Sender <sendgrid@example.com>").should().exist();
         find("div").withText("To: Feature Test <featuretest@example.com>, anotherto@example.com").should().exist();
         find("div").withText("Subject: Sending with SendGrid is Fun").should().exist();
 
@@ -94,7 +94,7 @@ public class HappyPathTest extends SeleniumTest {
     }
 
     private Response sendEmailUsingSendgrid(String token) throws Exception {
-        Email from = new Email("sendgrid@example.com");
+        Email from = new Email("sendgrid@example.com", "Sender");
         String subject = "Sending with SendGrid is Fun";
         Email to = new Email("featuretest@example.com", "Feature Test");
         Content content = new Content("text/plain", "B0dy");
