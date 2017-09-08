@@ -41,8 +41,8 @@ public class EmailControllerTest {
     @Test
     public void testList() throws Exception {
         when(emailRepository.findByInbox(any())).thenReturn(asList(
-                new EmailRecord(1, "foo", "bar", "baz", "zar", "zoo"),
-                new EmailRecord(22, "foo2", "bar2", "baz2", "zar2", "zoo2")
+                new EmailRecord(1, "foo", "bar", "app", "baz", "zar", "zoo"),
+                new EmailRecord(22, "foo2", "bar2", "app2", "baz2", "zar2", "zoo2")
         ));
 
         ResultActions resultActions = mockMvc.perform(get("/api/inbox/larry/emails").contentType(MediaType.APPLICATION_JSON));
@@ -51,10 +51,11 @@ public class EmailControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
 
-                .andExpect(jsonPath("$[0].*", hasSize(5)))
+                .andExpect(jsonPath("$[0].*", hasSize(6)))
                 .andExpect(jsonPath("$[0].id", equalTo(1)))
                 .andExpect(jsonPath("$[0].from", equalTo("foo")))
                 .andExpect(jsonPath("$[0].to", equalTo("bar")))
+                .andExpect(jsonPath("$[0].cc", equalTo("app")))
                 .andExpect(jsonPath("$[0].subject", equalTo("baz")))
                 .andExpect(jsonPath("$[0].body", equalTo("zar")))
 
@@ -66,17 +67,18 @@ public class EmailControllerTest {
     @Test
     public void testGet() throws Exception {
         when(emailRepository.findOne(1))
-                .thenReturn(new EmailRecord(1, "foo", "bar", "baz", "zar", "zoo"));
+                .thenReturn(new EmailRecord(1, "foo", "bar", "app", "baz", "zar", "zoo"));
 
         ResultActions resultActions = mockMvc.perform(get("/api/emails/1").contentType(MediaType.APPLICATION_JSON));
 
         resultActions
                 .andExpect(status().isOk())
 
-                .andExpect(jsonPath("$.*", hasSize(5)))
+                .andExpect(jsonPath("$.*", hasSize(6)))
                 .andExpect(jsonPath("$.id", equalTo(1)))
                 .andExpect(jsonPath("$.from", equalTo("foo")))
                 .andExpect(jsonPath("$.to", equalTo("bar")))
+                .andExpect(jsonPath("$.cc", equalTo("app")))
                 .andExpect(jsonPath("$.subject", equalTo("baz")))
                 .andExpect(jsonPath("$.body", equalTo("zar")));
     }

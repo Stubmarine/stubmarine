@@ -72,12 +72,14 @@ public class HappyPathTest extends SeleniumTest {
 
         find("div").withText("From: Sender <sendgrid@example.com>").should().exist();
         find("div").withText("To: Feature Test <featuretest@example.com>, anotherto@example.com").should().exist();
+        find("div").withText("Cc: cece@example.com, Seasea <anotherseasea@example.com>").should().exist();
         find("div").withText("Subject: Sending with SendGrid is Fun").should().exist();
 
         find(".email").click();
 
         find("dd").withText("sendgrid@example.com").should().exist();
         find("dd").withText("Feature Test <featuretest@example.com>, anotherto@example.com").should().exist();
+        find("dd").withText("cece@example.com, Seasea <anotherseasea@example.com>").should().exist();
         find("dd").withText("Sending with SendGrid is Fun").should().exist();
         find(".email-detail--body").withText("B0dy");
     }
@@ -102,6 +104,8 @@ public class HappyPathTest extends SeleniumTest {
 
         Personalization personalization = new Personalization();
         personalization.addTo(new Email("anotherto@example.com"));
+        personalization.addCc(new Email("cece@example.com"));
+        personalization.addCc(new Email("anotherseasea@example.com", "Seasea"));
         mail.addPersonalization(personalization);
 
         SendGrid sg = new SendGrid(token, true);

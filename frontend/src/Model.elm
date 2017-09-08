@@ -41,6 +41,7 @@ type alias EmailId = Int
 type alias Email =
   { id: EmailId
   , to: String
+  , cc: String
   , from: String
   , subject: String
   , body: String

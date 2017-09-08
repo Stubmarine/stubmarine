@@ -34,11 +34,18 @@ viewLandingPage model =
 
 viewEmailListItem : Email -> Html Msg
 viewEmailListItem email =
-  div [ class "email", onClick (SelectEmail email.id) ]
-    [ div [] [ text "From: ", text email.from ]
-    , div [] [ text "To: ", text email.to ]
-    , div [] [ text "Subject: ", text email.subject ]
-    ]
+  let
+    fromTo =
+      [ div [] [ text "From: ", text email.from ]
+      , div [] [ text "To: ", text email.to ]
+      ]
+    cc = if email.cc == "" then
+        [ ]
+      else
+        [ div [] [ text "Cc: ", text email.cc ] ]
+    subject = [ div [] [ text "Subject: ", text email.subject ] ]
+  in
+    div [ class "email", onClick (SelectEmail email.id) ] (fromTo ++ cc ++ subject)
 
 viewEmailsPage : Model -> Html Msg
 viewEmailsPage model =
@@ -64,23 +71,40 @@ viewEmailsPage model =
       Loading ->
         [ div [ class "email-detail" ] [ text "Loading..." ] ]
       Success email ->
-        [ div [ class "email-detail" ]
-          [ dl []
-            [ dt [] [ text "From:" ]
-            , dd [] [ text email.from ]
-            , dt [] [ text "To:" ]
-            , dd [] [ text email.to ]
-            , dt [] [ text "Subject:" ]
-            , dd [] [ text email.subject ]
-            , hr [] []
-            , div [ class "email-detail--body" ] [ text email.body ]
-            ]
-          ]
-        ]
+        [ viewEmail email ]
       Failure err ->
         [ div [ class "email-detail" ] [ text "Error" ] ]
   in
     div [ class "email-pane" ] (emailList ++ emailDetail)
+
+viewEmail : Email -> Html Msg
+viewEmail email =
+  let
+    from =
+      [ dt [] [ text "From:" ]
+      , dd [] [ text email.from ]
+      ]
+    to =
+      [ dt [] [ text "To:" ]
+      , dd [] [ text email.to ]
+      ]
+    cc = if email.cc == "" then
+        []
+      else
+        [ dt [] [ text "Cc:" ]
+        , dd [] [ text email.cc ]
+        ]
+    subject =
+      [ dt [] [ text "Subject:" ]
+      , dd [] [ text email.subject ]
+      ]
+    body =
+      [ hr [] []
+      , div [ class "email-detail--body" ] [ text email.body ]
+      ]
+  in
+    div [ class "email-detail" ]
+      [ dl [] ( from ++ to ++ cc ++ subject ++ body ) ]
 
 viewEndpoint : Endpoint -> Html Msg
 viewEndpoint endpoint =

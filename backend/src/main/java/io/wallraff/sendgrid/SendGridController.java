@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.List;
+
+import static java.util.Collections.emptyList;
 
 @RestController
 public class SendGridController {
@@ -43,10 +46,13 @@ public class SendGridController {
                 null,
                 toRecipient(form.getFrom()),
                 form.getPersonalizations().stream()
-                        .flatMap(p -> p.getTo().stream())
+                        .flatMap(p -> emptyOrList(p.getTo()).stream())
                         .map(SendGridController::toRecipient)
                         .reduce("", (s, s2) -> s + (s.equals("") ? "" : ", ") + s2),
-                form.getSubject(),
+                form.getPersonalizations().stream()
+                        .flatMap(p -> emptyOrList(p.getCc()).stream())
+                        .map(SendGridController::toRecipient)
+                        .reduce("", (s, s2) -> s + (s.equals("") ? "" : ", ") + s2), form.getSubject(),
                 form.getContent().stream()
                         .filter(c -> c.getType().equals("text/plain"))
                         .findFirst()
@@ -61,6 +67,14 @@ public class SendGridController {
             e.printStackTrace();
         }
         return new ResponseEntity<>("", HttpStatus.ACCEPTED);
+    }
+
+    private static <T> List<T> emptyOrList(List<T> items) {
+        if (items == null) {
+            return emptyList();
+        }
+
+        return items;
     }
 
     private static String toRecipient(AddressForm address) {
