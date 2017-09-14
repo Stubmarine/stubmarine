@@ -52,7 +52,12 @@ public class SendGridController {
                 form.getPersonalizations().stream()
                         .flatMap(p -> emptyOrList(p.getCc()).stream())
                         .map(SendGridController::toRecipient)
-                        .reduce("", (s, s2) -> s + (s.equals("") ? "" : ", ") + s2), form.getSubject(),
+                        .reduce("", (s, s2) -> s + (s.equals("") ? "" : ", ") + s2),
+                form.getPersonalizations().stream()
+                        .flatMap(p -> emptyOrList(p.getBcc()).stream())
+                        .map(SendGridController::toRecipient)
+                        .reduce("", (s, s2) -> s + (s.equals("") ? "" : ", ") + s2),
+                form.getSubject(),
                 form.getContent().stream()
                         .filter(c -> c.getType().equals("text/plain"))
                         .findFirst()

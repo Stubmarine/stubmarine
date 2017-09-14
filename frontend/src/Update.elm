@@ -120,6 +120,7 @@ decodeEmail =
     |: (Decode.field "id" Decode.int)
     |: (Decode.field "to" Decode.string)
     |: (Decode.field "cc" Decode.string)
+    |: (Decode.field "bcc" Decode.string)
     |: (Decode.field "from" Decode.string)
     |: (Decode.field "subject" Decode.string)
     |: (Decode.field "body" Decode.string)

@@ -46,7 +46,7 @@ public class EmailWebSocketHandlerTest {
 
 
         handler.broadcastNewEmailMessage(
-                new EmailRecord(4, "dog", "kitty", "app", "Lazy Dog", "jump jump", "zoo")
+                new EmailRecord(4, "dog", "kitty", "app", "Silent", "Lazy Dog", "jump jump", "zoo")
         );
 
 
@@ -54,11 +54,12 @@ public class EmailWebSocketHandlerTest {
 
         String payload = messageCaptor.getValue().getPayload();
         with(payload)
-                .assertThat("$.*", hasSize(6))
+                .assertThat("$.*", hasSize(7))
                 .assertThat("$.id", equalTo(4))
                 .assertThat("$.from", equalTo("dog"))
                 .assertThat("$.to", equalTo("kitty"))
                 .assertThat("$.cc", equalTo("app"))
+                .assertThat("$.bcc", equalTo("Silent"))
                 .assertThat("$.subject", equalTo("Lazy Dog"))
                 .assertThat("$.body", equalTo("jump jump"));
     }
@@ -75,7 +76,7 @@ public class EmailWebSocketHandlerTest {
 
 
         handler.broadcastNewEmailMessage(
-                new EmailRecord(4, "dog", "kitty", "app", "Lazy Dog", "jump jump", "zoo")
+                new EmailRecord(4, "dog", "kitty", "app", "silent", "Lazy Dog", "jump jump", "zoo")
         );
 
 
@@ -90,7 +91,7 @@ public class EmailWebSocketHandlerTest {
 
 
         handler.broadcastNewEmailMessage(
-                new EmailRecord(4, "dog", "kitty", "app", "Lazy Dog", "jump jump", "zoo")
+                new EmailRecord(4, "dog", "kitty", "app", "silent", "Lazy Dog", "jump jump", "zoo")
         );
 
 

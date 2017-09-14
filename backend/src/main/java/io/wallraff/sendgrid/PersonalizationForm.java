@@ -5,6 +5,7 @@ import java.util.List;
 public class PersonalizationForm {
     private List<AddressForm> to;
     private List<AddressForm> cc;
+    private List<AddressForm> bcc;
 
     public PersonalizationForm() {
     }
@@ -15,5 +16,9 @@ public class PersonalizationForm {
 
     public List<AddressForm> getCc() {
         return cc;
+    }
+
+    public List<AddressForm> getBcc() {
+        return bcc;
     }
 }

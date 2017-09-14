@@ -43,9 +43,13 @@ viewEmailListItem email =
         [ ]
       else
         [ div [] [ text "Cc: ", text email.cc ] ]
+    bcc = if email.bcc == "" then
+        [ ]
+      else
+        [ div [] [ text "Bcc: ", text email.bcc ] ]
     subject = [ div [] [ text "Subject: ", text email.subject ] ]
   in
-    div [ class "email", onClick (SelectEmail email.id) ] (fromTo ++ cc ++ subject)
+    div [ class "email", onClick (SelectEmail email.id) ] (fromTo ++ cc ++ bcc ++ subject)
 
 viewEmailsPage : Model -> Html Msg
 viewEmailsPage model =
@@ -94,6 +98,12 @@ viewEmail email =
         [ dt [] [ text "Cc:" ]
         , dd [] [ text email.cc ]
         ]
+    bcc = if email.bcc == "" then
+        []
+      else
+        [ dt [] [ text "Bcc:" ]
+        , dd [] [ text email.bcc ]
+        ]
     subject =
       [ dt [] [ text "Subject:" ]
       , dd [] [ text email.subject ]
@@ -104,7 +114,7 @@ viewEmail email =
       ]
   in
     div [ class "email-detail" ]
-      [ dl [] ( from ++ to ++ cc ++ subject ++ body ) ]
+      [ dl [] ( from ++ to ++ cc ++ bcc ++ subject ++ body ) ]
 
 viewEndpoint : Endpoint -> Html Msg
 viewEndpoint endpoint =

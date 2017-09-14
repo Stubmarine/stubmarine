@@ -73,6 +73,7 @@ public class HappyPathTest extends SeleniumTest {
         find("div").withText("From: Sender <sendgrid@example.com>").should().exist();
         find("div").withText("To: Feature Test <featuretest@example.com>, anotherto@example.com").should().exist();
         find("div").withText("Cc: cece@example.com, Seasea <anotherseasea@example.com>").should().exist();
+        find("div").withText("Bcc: bee@example.com, Bee Cece <anotherbee@example.com>").should().exist();
         find("div").withText("Subject: Sending with SendGrid is Fun").should().exist();
 
         find(".email").click();
@@ -80,6 +81,7 @@ public class HappyPathTest extends SeleniumTest {
         find("dd").withText("sendgrid@example.com").should().exist();
         find("dd").withText("Feature Test <featuretest@example.com>, anotherto@example.com").should().exist();
         find("dd").withText("cece@example.com, Seasea <anotherseasea@example.com>").should().exist();
+        find("dd").withText("bee@example.com, Bee Cece <anotherbee@example.com>").should().exist();
         find("dd").withText("Sending with SendGrid is Fun").should().exist();
         find(".email-detail--body").withText("B0dy");
     }
@@ -106,6 +108,8 @@ public class HappyPathTest extends SeleniumTest {
         personalization.addTo(new Email("anotherto@example.com"));
         personalization.addCc(new Email("cece@example.com"));
         personalization.addCc(new Email("anotherseasea@example.com", "Seasea"));
+        personalization.addBcc(new Email("bee@example.com"));
+        personalization.addBcc(new Email("anotherbee@example.com", "Bee Cece"));
         mail.addPersonalization(personalization);
 
         SendGrid sg = new SendGrid(token, true);

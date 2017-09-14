@@ -29,7 +29,8 @@ mail = Mail(from_email, subject, to_email, content)
 
 personalization = Personalization()
 personalization.add_to(Email("noizwaves@example.com"))
-personalization.add_cc(Email("seasea@example.com", "Cece"))
+# personalization.add_cc(Email("seasea@example.com", "Cece"))
+# personalization.add_bcc(Email("beeseac@example.com", "Beeseac"))
 mail.add_personalization(personalization)
 
 response = sg.client.mail.send.post(request_body=mail.get())

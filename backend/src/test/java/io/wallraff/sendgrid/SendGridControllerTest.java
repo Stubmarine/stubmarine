@@ -49,6 +49,7 @@ public class SendGridControllerTest {
                 "sender@example.com",
                 "to@example.com",
                 "",
+                "",
                 "My subjecT",
                 "Content content content!",
                 "zoo"
@@ -100,6 +101,7 @@ public class SendGridControllerTest {
                 "sender@example.com",
                 "to1@example.com, to2@example.com, to3@example.com",
                 "",
+                "",
                 "My subjecT",
                 "Content content content!",
                 "zoo"
@@ -150,7 +152,9 @@ public class SendGridControllerTest {
                 null,
                 "sender@example.com",
                 "",
-                "cc@example.com, Cecetwo <cc2@example.com>", "My subjecT",
+                "cc@example.com, Cecetwo <cc2@example.com>",
+                "",
+                "My subjecT",
                 "Content content content!",
                 "zoo"
         ))).thenReturn(savedRecord);
@@ -189,12 +193,60 @@ public class SendGridControllerTest {
     }
 
     @Test
+    public void testMailSend_BccRecipients() throws Exception {
+        EmailRecord savedRecord = mock(EmailRecord.class);
+        when(emailRepository.save(new EmailRecord(
+                null,
+                "sender@example.com",
+                "",
+                "",
+                "BeeCC <bcc@example.com>, bcc2@example.com",
+                "My subjecT",
+                "Content content content!",
+                "zoo"
+        ))).thenReturn(savedRecord);
+
+        when(sendGridTokenVerifier.verify(any())).thenReturn(true);
+        when(sendGridTokenVerifier.extractInbox(any())).thenReturn("zoo");
+
+        String content = "" +
+                "{" +
+                "  \"personalizations\": [{" +
+                "      \"bcc\": [" +
+                "        {\"email\": \"bcc@example.com\", \"name\": \"BeeCC\"}, " +
+                "        {\"email\": \"bcc2@example.com\"}" +
+                "      ] " +
+                "  }]," +
+                "  \"subject\": \"My subjecT\"," +
+                "  \"from\": {" +
+                "    \"email\": \"sender@example.com\"" +
+                "  }," +
+                "  \"content\": [{" +
+                "    \"type\": \"text/plain\"," +
+                "    \"value\": \"Content content content!\"" +
+                "  }]" +
+                "}";
+
+
+        mockMvc.perform(
+                post("/eapi/sendgrid/v3/mail/send")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content)
+                        .header("Authorization", "Bearer foobar")
+        );
+
+
+        verify(emailWebSocketHandler).broadcastNewEmailMessage(savedRecord);
+    }
+
+    @Test
     public void testMailSend_DisplayNames() throws Exception {
         EmailRecord savedRecord = mock(EmailRecord.class);
         when(emailRepository.save(new EmailRecord(
                 null,
                 "The Sender <sender@example.com>",
                 "To Name <to1@example.com>, to2@example.com, Another <to3@example.com>",
+                "",
                 "",
                 "My subjecT",
                 "Content content content!",

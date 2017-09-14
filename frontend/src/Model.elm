@@ -42,6 +42,7 @@ type alias Email =
   { id: EmailId
   , to: String
   , cc: String
+  , bcc: String
   , from: String
   , subject: String
   , body: String
