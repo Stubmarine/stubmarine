@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static java.util.Arrays.asList;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -34,6 +35,9 @@ public class SendGridControllerTest {
     @Mock
     private SendGridTokenVerifier sendGridTokenVerifier;
 
+    @Mock
+    private SendGridEmailFactory sendGridEmailFactory;
+
     private MockMvc mockMvc;
 
     @Before
@@ -43,17 +47,11 @@ public class SendGridControllerTest {
 
     @Test
     public void testMailSend() throws Exception {
+        EmailRecord generatedRecord = mock(EmailRecord.class);
+        when(sendGridEmailFactory.getEmailFromRequest(any(), any())).thenReturn(generatedRecord);
+
         EmailRecord savedRecord = mock(EmailRecord.class);
-        when(emailRepository.save(new EmailRecord(
-                null,
-                "sender@example.com",
-                "to@example.com",
-                "",
-                "",
-                "My subjecT",
-                "Content content content!",
-                "zoo"
-        ))).thenReturn(savedRecord);
+        when(emailRepository.save(any(EmailRecord.class))).thenReturn(savedRecord);
 
         when(sendGridTokenVerifier.verify(any())).thenReturn(true);
         when(sendGridTokenVerifier.extractInbox(any())).thenReturn("zoo");
@@ -87,25 +85,40 @@ public class SendGridControllerTest {
                 .andExpect(status().isAccepted())
                 .andExpect(content().string(""));
 
-        verify(emailWebSocketHandler).broadcastNewEmailMessage(savedRecord);
-
         verify(sendGridTokenVerifier).verify("foobar");
         verify(sendGridTokenVerifier).extractInbox("foobar");
+
+        verify(sendGridEmailFactory).getEmailFromRequest(
+                new MailSendForm(
+                        "My subjecT",
+                        new AddressForm("sender@example.com", null),
+                        asList(
+                                new PersonalizationForm(
+                                        asList(new AddressForm("to@example.com", null)),
+                                        null,
+                                        null
+                                )
+                        ),
+                        asList(
+                                new ContentForm("text/plain", "Content content content!")
+                        )
+                ),
+                "zoo"
+        );
+
+        verify(emailRepository).save(generatedRecord);
+
+        verify(emailWebSocketHandler).broadcastNewEmailMessage(savedRecord);
+
     }
 
     @Test
     public void testMailSend_MultipleRecipients() throws Exception {
+        EmailRecord generatedRecord = mock(EmailRecord.class);
+        when(sendGridEmailFactory.getEmailFromRequest(any(), any())).thenReturn(generatedRecord);
+
         EmailRecord savedRecord = mock(EmailRecord.class);
-        when(emailRepository.save(new EmailRecord(
-                null,
-                "sender@example.com",
-                "to1@example.com, to2@example.com, to3@example.com",
-                "",
-                "",
-                "My subjecT",
-                "Content content content!",
-                "zoo"
-        ))).thenReturn(savedRecord);
+        when(emailRepository.save(generatedRecord)).thenReturn(savedRecord);
 
         when(sendGridTokenVerifier.verify(any())).thenReturn(true);
         when(sendGridTokenVerifier.extractInbox(any())).thenReturn("zoo");
@@ -142,22 +155,44 @@ public class SendGridControllerTest {
         );
 
 
+        verify(sendGridEmailFactory).getEmailFromRequest(
+                new MailSendForm(
+                        "My subjecT",
+                        new AddressForm("sender@example.com", null),
+                        asList(
+                                new PersonalizationForm(
+                                        asList(
+                                                new AddressForm("to1@example.com", null),
+                                                new AddressForm("to2@example.com", null)
+                                        ),
+                                        null,
+                                        null
+                                ),
+                                new PersonalizationForm(
+                                        asList(
+                                                new AddressForm("to3@example.com", null)
+                                        ),
+                                        null,
+                                        null
+                                )
+                        ),
+                        asList(
+                                new ContentForm("text/plain", "Content content content!")
+                        )
+                ),
+                "zoo"
+        );
+
         verify(emailWebSocketHandler).broadcastNewEmailMessage(savedRecord);
     }
 
     @Test
     public void testMailSend_CcRecipients() throws Exception {
+        EmailRecord generatedRecord = mock(EmailRecord.class);
+        when(sendGridEmailFactory.getEmailFromRequest(any(), any())).thenReturn(generatedRecord);
+
         EmailRecord savedRecord = mock(EmailRecord.class);
-        when(emailRepository.save(new EmailRecord(
-                null,
-                "sender@example.com",
-                "",
-                "cc@example.com, Cecetwo <cc2@example.com>",
-                "",
-                "My subjecT",
-                "Content content content!",
-                "zoo"
-        ))).thenReturn(savedRecord);
+        when(emailRepository.save(generatedRecord)).thenReturn(savedRecord);
 
         when(sendGridTokenVerifier.verify(any())).thenReturn(true);
         when(sendGridTokenVerifier.extractInbox(any())).thenReturn("zoo");
@@ -188,23 +223,37 @@ public class SendGridControllerTest {
                         .header("Authorization", "Bearer foobar")
         );
 
+        verify(sendGridEmailFactory).getEmailFromRequest(
+                new MailSendForm(
+                        "My subjecT",
+                        new AddressForm("sender@example.com", null),
+                        asList(
+                                new PersonalizationForm(
+                                        null,
+                                        asList(
+                                                new AddressForm("cc@example.com", null),
+                                                new AddressForm("cc2@example.com", "Cecetwo")
+                                        ),
+                                        null
+                                )
+                        ),
+                        asList(
+                                new ContentForm("text/plain", "Content content content!")
+                        )
+                ),
+                "zoo"
+        );
 
         verify(emailWebSocketHandler).broadcastNewEmailMessage(savedRecord);
     }
 
     @Test
     public void testMailSend_BccRecipients() throws Exception {
+        EmailRecord generatedRecord = mock(EmailRecord.class);
+        when(sendGridEmailFactory.getEmailFromRequest(any(), any())).thenReturn(generatedRecord);
+
         EmailRecord savedRecord = mock(EmailRecord.class);
-        when(emailRepository.save(new EmailRecord(
-                null,
-                "sender@example.com",
-                "",
-                "",
-                "BeeCC <bcc@example.com>, bcc2@example.com",
-                "My subjecT",
-                "Content content content!",
-                "zoo"
-        ))).thenReturn(savedRecord);
+        when(emailRepository.save(generatedRecord)).thenReturn(savedRecord);
 
         when(sendGridTokenVerifier.verify(any())).thenReturn(true);
         when(sendGridTokenVerifier.extractInbox(any())).thenReturn("zoo");
@@ -236,22 +285,37 @@ public class SendGridControllerTest {
         );
 
 
+        verify(sendGridEmailFactory).getEmailFromRequest(
+                new MailSendForm(
+                        "My subjecT",
+                        new AddressForm("sender@example.com", null),
+                        asList(
+                                new PersonalizationForm(
+                                        null,
+                                        null,
+                                        asList(
+                                                new AddressForm("bcc@example.com", "BeeCC"),
+                                                new AddressForm("bcc2@example.com", null)
+                                        )
+                                )
+                        ),
+                        asList(
+                                new ContentForm("text/plain", "Content content content!")
+                        )
+                ),
+                "zoo"
+        );
+
         verify(emailWebSocketHandler).broadcastNewEmailMessage(savedRecord);
     }
 
     @Test
     public void testMailSend_DisplayNames() throws Exception {
+        EmailRecord generatedRecord = mock(EmailRecord.class);
+        when(sendGridEmailFactory.getEmailFromRequest(any(), any())).thenReturn(generatedRecord);
+
         EmailRecord savedRecord = mock(EmailRecord.class);
-        when(emailRepository.save(new EmailRecord(
-                null,
-                "The Sender <sender@example.com>",
-                "To Name <to1@example.com>, to2@example.com, Another <to3@example.com>",
-                "",
-                "",
-                "My subjecT",
-                "Content content content!",
-                "zoo"
-        ))).thenReturn(savedRecord);
+        when(emailRepository.save(generatedRecord)).thenReturn(savedRecord);
 
         when(sendGridTokenVerifier.verify(any())).thenReturn(true);
         when(sendGridTokenVerifier.extractInbox(any())).thenReturn("zoo");
@@ -291,6 +355,34 @@ public class SendGridControllerTest {
         );
 
 
+        verify(sendGridEmailFactory).getEmailFromRequest(
+                new MailSendForm(
+                        "My subjecT",
+                        new AddressForm("sender@example.com", "The Sender"),
+                        asList(
+                                new PersonalizationForm(
+                                        asList(
+                                                new AddressForm("to1@example.com", "To Name"),
+                                                new AddressForm("to2@example.com", null)
+                                        ),
+                                        null,
+                                        null
+                                ),
+                                new PersonalizationForm(
+                                        asList(
+                                                new AddressForm("to3@example.com", "Another")
+                                        ),
+                                        null,
+                                        null
+                                )
+                        ),
+                        asList(
+                                new ContentForm("text/plain", "Content content content!")
+                        )
+                ),
+                "zoo"
+        );
+
         verify(emailWebSocketHandler).broadcastNewEmailMessage(savedRecord);
     }
 
@@ -328,6 +420,7 @@ public class SendGridControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string(""));
 
+        verifyZeroInteractions(sendGridEmailFactory);
         verifyZeroInteractions(emailRepository);
         verifyZeroInteractions(emailWebSocketHandler);
 
@@ -365,6 +458,7 @@ public class SendGridControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string(""));
 
+        verifyZeroInteractions(sendGridEmailFactory);
         verifyZeroInteractions(sendGridTokenVerifier);
         verifyZeroInteractions(emailRepository);
         verifyZeroInteractions(emailWebSocketHandler);
@@ -400,6 +494,7 @@ public class SendGridControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string(""));
 
+        verifyZeroInteractions(sendGridEmailFactory);
         verifyZeroInteractions(sendGridTokenVerifier);
         verifyZeroInteractions(emailRepository);
         verifyZeroInteractions(emailWebSocketHandler);

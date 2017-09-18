@@ -18,7 +18,6 @@ import java.net.URISyntaxException;
 import static com.jayway.jsonassert.JsonAssert.with;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 

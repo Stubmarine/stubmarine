@@ -9,7 +9,7 @@ import javax.persistence.*;
 public class EmailRecord {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
     @Column(name = "_from")
     private String from;
@@ -21,7 +21,8 @@ public class EmailRecord {
     @JsonIgnore
     private String inbox;
 
-    protected EmailRecord() {}
+    protected EmailRecord() {
+    }
 
     public EmailRecord(Integer id, String from, String to, String cc, String bcc, String subject, String body, String inbox) {
         this.id = id;

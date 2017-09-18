@@ -11,24 +11,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.List;
-
-import static java.util.Collections.emptyList;
 
 @RestController
 public class SendGridController {
     private final EmailRepository emailRepository;
     private final EmailWebSocketHandler emailWebSocketHandler;
     private final SendGridTokenVerifier sendGridTokenVerifier;
+    private final SendGridEmailFactory sendGridEmailFactory;
 
     public SendGridController(
             EmailRepository emailRepository,
             EmailWebSocketHandler emailWebSocketHandler,
-            SendGridTokenVerifier sendGridTokenVerifier
+            SendGridTokenVerifier sendGridTokenVerifier,
+            SendGridEmailFactory sendGridEmailFactory
     ) {
         this.emailRepository = emailRepository;
         this.emailWebSocketHandler = emailWebSocketHandler;
         this.sendGridTokenVerifier = sendGridTokenVerifier;
+        this.sendGridEmailFactory = sendGridEmailFactory;
     }
 
     @RequestMapping(path = "/eapi/sendgrid/v3/mail/send")
@@ -41,53 +41,16 @@ public class SendGridController {
         }
 
         String inbox = sendGridTokenVerifier.extractInbox(authorization.substring(7));
-
-        EmailRecord newEmail = emailRepository.save(new EmailRecord(
-                null,
-                toRecipient(form.getFrom()),
-                form.getPersonalizations().stream()
-                        .flatMap(p -> emptyOrList(p.getTo()).stream())
-                        .map(SendGridController::toRecipient)
-                        .reduce("", (s, s2) -> s + (s.equals("") ? "" : ", ") + s2),
-                form.getPersonalizations().stream()
-                        .flatMap(p -> emptyOrList(p.getCc()).stream())
-                        .map(SendGridController::toRecipient)
-                        .reduce("", (s, s2) -> s + (s.equals("") ? "" : ", ") + s2),
-                form.getPersonalizations().stream()
-                        .flatMap(p -> emptyOrList(p.getBcc()).stream())
-                        .map(SendGridController::toRecipient)
-                        .reduce("", (s, s2) -> s + (s.equals("") ? "" : ", ") + s2),
-                form.getSubject(),
-                form.getContent().stream()
-                        .filter(c -> c.getType().equals("text/plain"))
-                        .findFirst()
-                        .map(ContentForm::getValue)
-                        .orElse(""),
-                inbox
-        ));
+        EmailRecord unsaved = sendGridEmailFactory.getEmailFromRequest(form, inbox);
+        EmailRecord saved = emailRepository.save(unsaved);
 
         try {
-            emailWebSocketHandler.broadcastNewEmailMessage(newEmail);
+            emailWebSocketHandler.broadcastNewEmailMessage(saved);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         return new ResponseEntity<>("", HttpStatus.ACCEPTED);
-    }
-
-    private static <T> List<T> emptyOrList(List<T> items) {
-        if (items == null) {
-            return emptyList();
-        }
-
-        return items;
-    }
-
-    private static String toRecipient(AddressForm address) {
-        if (address.getName() != null) {
-            return String.format("%s <%s>", address.getName(), address.getEmail());
-        }
-
-        return address.getEmail();
     }
 
     private boolean checkAuthentication(@RequestHeader String authorization) {
