@@ -13,6 +13,6 @@
   },
   "scripts": {
     "build": "./node_modules/.bin/webpack",
-    "start": "./node_modules/.bin/webpack-dev-server --port 3000"
+    "start": "./node_modules/.bin/webpack-dev-server --port 3000 --history-api-fallback"
   }
 }

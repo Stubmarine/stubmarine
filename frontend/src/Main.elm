@@ -1,9 +1,9 @@
-import Html exposing (programWithFlags)
 import RemoteData exposing (RemoteData(..))
 import Task
+import Navigation exposing (Location)
 
-import Message exposing (Msg)
-import Model exposing (Model, Route(Landing))
+import Message exposing (Msg, Msg(OnLocationChange))
+import Model exposing (Model, Route(LandingRoute))
 import Subscriptions exposing (subscriptions)
 import Update exposing (update, fetchEmailList)
 import View exposing (view)
@@ -21,26 +21,27 @@ send msg =
 initModel : Flags -> Model
 initModel flags =
   { wsapiBasePath = flags.wsapiBasePath
-  , route = Landing
+  , route = LandingRoute
   , inboxName = ""
   , emails = NotAsked
   , email = NotAsked
   , endpoints = NotAsked
   }
 
-initMsg : Cmd Msg
-initMsg =
-  Cmd.none
+initMsg : Location -> Cmd Msg
+initMsg location =
+  send (OnLocationChange location)
 
-init : Flags -> ( Model, Cmd Msg )
-init flags =
-  ( initModel flags, initMsg )
+init : Flags -> Location -> ( Model, Cmd Msg )
+init flags location =
+  ( initModel flags, initMsg location )
+
 
 main : Program Flags Model Msg
 main =
-  programWithFlags
-    { init = init
-    , view = view
-    , update = update
-    , subscriptions = subscriptions
-    }
+    Navigation.programWithFlags OnLocationChange
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }

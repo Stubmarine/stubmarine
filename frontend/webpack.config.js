@@ -60,6 +60,9 @@ module.exports = {
             }
         },
         stats: {colors: true},
+        historyApiFallback: {
+            index: 'index.html'
+        },
     },
 
 

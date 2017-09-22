@@ -1,16 +1,13 @@
 module Message exposing (..)
 
 import RemoteData exposing (WebData)
+import Navigation exposing (Location)
 
 import Model exposing (EmailList, EmailId, Email, EndpointList, Route)
 
 type Msg
   = FormInputInboxName String
   | GenerateRandomInboxName
-
-  | ChangeRoute Route
-
-  | SelectInbox String
 
   | UpdateEmails (WebData EmailList)
 
@@ -20,3 +17,6 @@ type Msg
   | UpdateEndpoints (WebData EndpointList)
 
   | WSEmailsMessage String
+
+  | ChangeLocation String
+  | OnLocationChange Location

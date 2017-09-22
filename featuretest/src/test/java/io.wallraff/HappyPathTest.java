@@ -2,6 +2,7 @@ package io.wallraff;
 
 import com.sendgrid.*;
 import net.codestory.simplelenium.SeleniumTest;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,8 +49,10 @@ public class HappyPathTest extends SeleniumTest {
 
         // Select an inbox
         find("button").withText("Suggest Random Name").click();
+        String suggestedName = driver().findElementByCssSelector("#inbox-name").getAttribute("value");
         find("button").withText("Continue").click();
 
+        assertThat(driver().getCurrentUrl(), equalTo("http://" + hostname + ":" + port + "/inbox/" + suggestedName));
         find(".alert-warning")
                 .withText("Inbox is empty.Send an email to one of the endpoints above and it will appear here.")
                 .should().exist();

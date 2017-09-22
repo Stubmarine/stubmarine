@@ -12,13 +12,11 @@ type alias Model =
   , endpoints: WebData EndpointList
   }
 
-type InboxRoute
-  = Emails
-  | Endpoints
-
 type Route
-  = Landing
-  | Inbox InboxName InboxRoute
+  = LandingRoute
+  | InboxRoute InboxName
+  | InboxEndpointsRoute InboxName
+  | NotFoundRoute
 
 type alias InboxName = String
 

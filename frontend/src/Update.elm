@@ -8,9 +8,11 @@ import Json.Decode.Extra exposing ((|:))
 import Http
 import Random
 import RemoteData exposing (sendRequest, RemoteData(..))
+import Navigation exposing (newUrl)
 
 import Message exposing (Msg, Msg(..))
 import Model exposing (..)
+import Routing exposing (parseLocation, inboxPath, endpointPath, landingRoutePath)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -20,18 +22,6 @@ update msg model =
       ( { model | inboxName = inboxName }, Cmd.none )
     GenerateRandomInboxName ->
       ( model, Random.generate FormInputInboxName randomInboxName )
-
-    ChangeRoute target ->
-      ( { model | route = target }, Cmd.none )
-
-    SelectInbox inboxName ->
-      ( model, Cmd.none )
-      -- Fetch emails
-        |> \(m, c) -> ( { m | emails = Loading, email = NotAsked }, Cmd.batch [c, fetchEmailList inboxName] )
-      -- Fetch endpoints
-        |> \(m, c) -> ( { m | endpoints = Loading }, Cmd.batch [c, fetchEndpointList inboxName] )
-      -- change route
-        |> \(m, c) -> ( { m | route = Inbox inboxName Emails }, c )
 
     UpdateEmails response ->
       ( { model | emails = response }, Cmd.none )
@@ -58,6 +48,29 @@ update msg model =
             ( { model | emails = (Success (existingEmails ++ [newEmail])) }, Cmd.none )
           _ ->
             ( model, Cmd.none )
+
+    ChangeLocation path ->
+      ( model, newUrl path )
+
+    OnLocationChange location ->
+      let
+        newRouteModel = { model | route = parseLocation location }
+
+        ( newModel, newCmd ) = case newRouteModel.route of
+          InboxRoute inboxName ->
+            ( newRouteModel, Cmd.none )
+            -- Fetch emails
+              |> \(m, c) -> ( { m | emails = Loading, email = NotAsked }, Cmd.batch [c, fetchEmailList inboxName] )
+          InboxEndpointsRoute inboxName ->
+            ( newRouteModel, Cmd.none )
+            -- Fetch endpoints
+              |> \(m, c) -> ( { m | endpoints = Loading }, Cmd.batch [c, fetchEndpointList inboxName] )
+
+          _ ->
+            ( newRouteModel, Cmd.none )
+
+      in
+        ( newModel, newCmd )
 
 randomStringArrayItem : Array.Array String -> Random.Generator String
 randomStringArrayItem items =

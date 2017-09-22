@@ -1,13 +1,15 @@
 module View exposing (view)
 
-import Html exposing (Html, a, button, div, em ,form, input, text, dd, dt, dl, h3, hr, span, ul, li)
-import Html.Attributes exposing (class, classList, defaultValue, disabled, id, placeholder, type_)
-import Html.Events exposing (onClick, onInput, onSubmit)
+import Html exposing (Attribute, Html, a, button, div, em ,form, input, text, dd, dt, dl, h3, hr, span, ul, li)
+import Html.Attributes exposing (class, classList, defaultValue, disabled, id, placeholder, type_, href)
+import Html.Events exposing (onClick, onInput, onSubmit, onWithOptions)
+import Json.Decode as Decode
 
 import RemoteData exposing (RemoteData(..))
 
 import Model exposing (..)
 import Message exposing (..)
+import Routing exposing (..)
 
 viewLandingPage : Model -> Html Msg
 viewLandingPage model =
@@ -15,7 +17,7 @@ viewLandingPage model =
     isValid = isValidInboxName model.inboxName
 
     formAttrs = if isValid then
-        [ class "form", onSubmit (SelectInbox model.inboxName) ]
+        [ class "form", onSubmit (ChangeLocation (inboxPath model.inboxName)) ]
       else
         [ class "form" ]
   in
@@ -157,13 +159,17 @@ viewEndpointsPage model =
       [ div [ class "endpoint-list" ] content
       ]
 
-viewInbox : String -> InboxRoute -> Model -> Html Msg
+type InboxSubRoute
+ = MessagesSubRoute
+ | EndpointsSubRoute
+
+viewInbox : String -> InboxSubRoute -> Model -> Html Msg
 viewInbox inboxName subRoute model =
   let
     content = case subRoute of
-      Emails ->
+      MessagesSubRoute ->
         viewEmailsPage model
-      Endpoints ->
+      EndpointsSubRoute ->
         viewEndpointsPage model
 
     navLinkClasses = \target -> classList
@@ -177,10 +183,10 @@ viewInbox inboxName subRoute model =
           [ span [ class "nav-link" ] [ text inboxName ]
           ]
         , li [ class "nav-item" ]
-          [ a [ navLinkClasses Emails, onClick (ChangeRoute (Inbox inboxName Emails)) ] [ text "Emails" ]
+          [ a [ navLinkClasses MessagesSubRoute, href (inboxPath inboxName), onLinkClick (ChangeLocation (inboxPath inboxName)) ] [ text "Emails" ]
           ]
         , li [ class "nav-item" ]
-          [ a [ navLinkClasses Endpoints, onClick (ChangeRoute (Inbox inboxName Endpoints)) ] [ text "Endpoints" ]
+          [ a [ navLinkClasses EndpointsSubRoute, href (endpointPath inboxName), onLinkClick (ChangeLocation (endpointPath inboxName)) ] [ text "Endpoints" ]
           ]
         ]
       ]
@@ -194,17 +200,31 @@ view : Model -> Html Msg
 view model =
   let
     pageContent = case model.route of
-      Landing ->
+      LandingRoute ->
         viewLandingPage model
-      Inbox inboxName subRoute ->
-        viewInbox inboxName subRoute model
+      InboxRoute inboxName ->
+        viewInbox inboxName MessagesSubRoute model
+      InboxEndpointsRoute inboxName ->
+        viewInbox inboxName EndpointsSubRoute model
+      NotFoundRoute ->
+        text "Not Found"
   in
     div []
       [ div [ class "nav-bar" ]
         [ div [ class "container container__nav" ]
-          [ div [ class "logo", onClick (ChangeRoute Landing) ] [ text "Wallraff" ]
+          [ a [ class "logo", href landingRoutePath, onLinkClick (ChangeLocation landingRoutePath) ] [ text "Wallraff" ]
           , ul [ class "nav" ] [ ]
           ]
         ]
       , pageContent
       ]
+
+onLinkClick : msg -> Attribute msg
+onLinkClick message =
+    let
+        options =
+            { stopPropagation = False
+            , preventDefault = True
+            }
+    in
+        onWithOptions "click" options (Decode.succeed message)
