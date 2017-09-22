@@ -9,7 +9,7 @@ if len(argv) not in [2, 3]:
     exit(1)
 
 if len(argv) == 3 and argv[2] == "production":
-    host = "https://wallraff.cfapps.io"
+    host = "https://stubmarine.cfapps.io"
 else:
     host = "http://localhost:8080"
 

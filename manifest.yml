@@ -1,6 +1,6 @@
 ---
 applications:
-- name: wallraff
+- name: stubmarine
   memory: 2G
   buildpack: java_buildpack
   path: dist/backend-0.1.0-SNAPSHOT.jar

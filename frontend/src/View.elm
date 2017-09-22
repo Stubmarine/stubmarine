@@ -206,7 +206,7 @@ view model =
     div []
       [ div [ class "nav-bar" ]
         [ div [ class "container container__nav" ]
-          [ a [ class "logo", href landingRoutePath, onLinkClick (ChangeLocation landingRoutePath) ] [ text "Wallraff" ]
+          [ a [ class "logo", href landingRoutePath, onLinkClick (ChangeLocation landingRoutePath) ] [ text "Stubmarine" ]
           , ul [ class "nav" ] [ ]
           ]
         ]
