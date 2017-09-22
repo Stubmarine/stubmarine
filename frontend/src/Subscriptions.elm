@@ -1,6 +1,6 @@
 module Subscriptions exposing (subscriptions)
 
-import Model exposing (Model, Route(InboxRoute, InboxEndpointsRoute))
+import Model exposing (Model, Route(InboxRoute))
 import Message exposing (Msg, Msg(WSEmailsMessage))
 import WebSocket
 
@@ -11,8 +11,6 @@ subscriptions model =
 
     email = case model.route of
       InboxRoute inboxName ->
-         WebSocket.listen (url inboxName) WSEmailsMessage
-      InboxEndpointsRoute inboxName ->
          WebSocket.listen (url inboxName) WSEmailsMessage
       _ ->
         Sub.none

@@ -7,6 +7,7 @@ type alias Model =
   { wsapiBasePath: String
   , route: Route
   , inboxName: InboxName
+  , inboxPage: InboxPage
   , emails: WebData EmailList
   , email: WebData Email
   , endpoints: WebData EndpointList
@@ -15,8 +16,15 @@ type alias Model =
 type Route
   = LandingRoute
   | InboxRoute InboxName
-  | InboxEndpointsRoute InboxName
   | NotFoundRoute
+
+type alias InboxPage =
+  { subRoute: InboxPageSubRoute
+  }
+
+type InboxPageSubRoute
+  = MessagesSubRoute
+  | EndpointsSubRoute
 
 type alias InboxName = String
 

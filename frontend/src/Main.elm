@@ -3,7 +3,7 @@ import Task
 import Navigation exposing (Location)
 
 import Message exposing (Msg, Msg(OnLocationChange))
-import Model exposing (Model, Route(LandingRoute))
+import Model exposing (Model, Route(LandingRoute), InboxPage, InboxPageSubRoute(..))
 import Subscriptions exposing (subscriptions)
 import Update exposing (update, fetchEmailList)
 import View exposing (view)
@@ -23,6 +23,7 @@ initModel flags =
   { wsapiBasePath = flags.wsapiBasePath
   , route = LandingRoute
   , inboxName = ""
+  , inboxPage = InboxPage MessagesSubRoute
   , emails = NotAsked
   , email = NotAsked
   , endpoints = NotAsked

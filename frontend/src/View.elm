@@ -159,11 +159,7 @@ viewEndpointsPage model =
       [ div [ class "endpoint-list" ] content
       ]
 
-type InboxSubRoute
- = MessagesSubRoute
- | EndpointsSubRoute
-
-viewInbox : String -> InboxSubRoute -> Model -> Html Msg
+viewInbox : String -> InboxPageSubRoute -> Model -> Html Msg
 viewInbox inboxName subRoute model =
   let
     content = case subRoute of
@@ -183,10 +179,10 @@ viewInbox inboxName subRoute model =
           [ span [ class "nav-link" ] [ text inboxName ]
           ]
         , li [ class "nav-item" ]
-          [ a [ navLinkClasses MessagesSubRoute, href (inboxPath inboxName), onLinkClick (ChangeLocation (inboxPath inboxName)) ] [ text "Emails" ]
+          [ a [ navLinkClasses MessagesSubRoute, href (inboxPath inboxName), onLinkClick (ChangeInboxPageSubRoute MessagesSubRoute) ] [ text "Emails" ]
           ]
         , li [ class "nav-item" ]
-          [ a [ navLinkClasses EndpointsSubRoute, href (endpointPath inboxName), onLinkClick (ChangeLocation (endpointPath inboxName)) ] [ text "Endpoints" ]
+          [ a [ navLinkClasses EndpointsSubRoute, href (inboxPath inboxName), onLinkClick (ChangeInboxPageSubRoute EndpointsSubRoute) ] [ text "Endpoints" ]
           ]
         ]
       ]
@@ -203,9 +199,7 @@ view model =
       LandingRoute ->
         viewLandingPage model
       InboxRoute inboxName ->
-        viewInbox inboxName MessagesSubRoute model
-      InboxEndpointsRoute inboxName ->
-        viewInbox inboxName EndpointsSubRoute model
+        viewInbox inboxName model.inboxPage.subRoute model
       NotFoundRoute ->
         text "Not Found"
   in

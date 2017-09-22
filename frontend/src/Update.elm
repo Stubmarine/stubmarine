@@ -12,7 +12,7 @@ import Navigation exposing (newUrl)
 
 import Message exposing (Msg, Msg(..))
 import Model exposing (..)
-import Routing exposing (parseLocation, inboxPath, endpointPath, landingRoutePath)
+import Routing exposing (parseLocation, inboxPath, landingRoutePath)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -22,6 +22,13 @@ update msg model =
       ( { model | inboxName = inboxName }, Cmd.none )
     GenerateRandomInboxName ->
       ( model, Random.generate FormInputInboxName randomInboxName )
+
+    ChangeInboxPageSubRoute subRoute ->
+      let
+        inboxPage = model.inboxPage
+        page = { inboxPage | subRoute = subRoute }
+      in
+        ( { model | inboxPage = page }, Cmd.none )
 
     UpdateEmails response ->
       ( { model | emails = response }, Cmd.none )
@@ -61,8 +68,6 @@ update msg model =
             ( newRouteModel, Cmd.none )
             -- Fetch emails
               |> \(m, c) -> ( { m | emails = Loading, email = NotAsked }, Cmd.batch [c, fetchEmailList inboxName] )
-          InboxEndpointsRoute inboxName ->
-            ( newRouteModel, Cmd.none )
             -- Fetch endpoints
               |> \(m, c) -> ( { m | endpoints = Loading }, Cmd.batch [c, fetchEndpointList inboxName] )
 
