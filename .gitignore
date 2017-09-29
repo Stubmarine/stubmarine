@@ -17,3 +17,4 @@ featuretest/gradle/
 featuretest/gradlew
 featuretest/gradlew.bat
 featuretest/snapshots/
+*.iml
