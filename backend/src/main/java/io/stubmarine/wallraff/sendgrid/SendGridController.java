@@ -41,14 +41,16 @@ public class SendGridController {
         }
 
         String inbox = sendGridTokenVerifier.extractInbox(authorization.substring(7));
-        EmailRecord unsaved = sendGridEmailFactory.getEmailFromRequest(form, inbox);
-        EmailRecord saved = emailRepository.save(unsaved);
 
-        try {
-            emailWebSocketHandler.broadcastNewEmailMessage(saved);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        sendGridEmailFactory.getEmailsFromRequest(form, inbox)
+                .forEach((unsaved) -> {
+                    EmailRecord saved = emailRepository.save(unsaved);
+                    try {
+                        emailWebSocketHandler.broadcastNewEmailMessage(saved);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
 
         return new ResponseEntity<>("", HttpStatus.ACCEPTED);
     }

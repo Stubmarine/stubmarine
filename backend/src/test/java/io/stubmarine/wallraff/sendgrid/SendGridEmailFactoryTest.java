@@ -6,10 +6,14 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.Collection;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SendGridEmailFactoryTest {
@@ -18,14 +22,17 @@ public class SendGridEmailFactoryTest {
     private SendGridEmailFactory factory;
 
     @Test
-    public void testGetEmailFromRequest() throws Exception {
-        EmailRecord result = factory.getEmailFromRequest(
+    public void testGetEmailsFromRequest() throws Exception {
+        Collection<EmailRecord> results = factory.getEmailsFromRequest(
                 new MailSendForm(
                         "My subjecT",
                         new AddressForm("sender@example.com", null),
                         asList(
                                 new PersonalizationForm(
-                                        asList(new AddressForm("to@example.com", null)),
+                                        asList(
+                                                new AddressForm("to@example.com", null),
+                                                new AddressForm("to2@example.com", null)
+                                        ),
                                         emptyList(),
                                         emptyList()
                                 )
@@ -37,12 +44,14 @@ public class SendGridEmailFactoryTest {
                 "zoo"
         );
 
+        assertThat(results, hasSize(1));
 
+        EmailRecord result = results.stream().findFirst().get();
         assertThat(result, equalTo(
                 new EmailRecord(
                         null,
                         "sender@example.com",
-                        "to@example.com",
+                        "to@example.com, to2@example.com",
                         "",
                         "",
                         "My subjecT",
@@ -53,50 +62,8 @@ public class SendGridEmailFactoryTest {
     }
 
     @Test
-    public void testGetEmailFromRequest_MultipleRecipients() throws Exception {
-        EmailRecord result = factory.getEmailFromRequest(
-                new MailSendForm(
-                        "My subjecT",
-                        new AddressForm("sender@example.com", null),
-                        asList(
-                                new PersonalizationForm(
-                                        asList(
-                                                new AddressForm("to1@example.com", null),
-                                                new AddressForm("to2@example.com", null)
-                                        ),
-                                        null,
-                                        null
-                                ),
-                                new PersonalizationForm(
-                                        asList(
-                                                new AddressForm("to3@example.com", null)
-                                        ),
-                                        null,
-                                        null
-                                )
-                        ),
-                        asList(
-                                new ContentForm("text/plain", "Content content content!")
-                        )
-                ),
-                "zoo"
-        );
-
-        assertThat(result, equalTo(new EmailRecord(
-                null,
-                "sender@example.com",
-                "to1@example.com, to2@example.com, to3@example.com",
-                "",
-                "",
-                "My subjecT",
-                "Content content content!",
-                "zoo"
-        )));
-    }
-
-    @Test
-    public void testGetEmailFromRequest_CcRecipients() throws Exception {
-        EmailRecord result = factory.getEmailFromRequest(
+    public void testGetEmailsFromRequest_CcRecipients() throws Exception {
+        Collection<EmailRecord> results = factory.getEmailsFromRequest(
                 new MailSendForm(
                         "My subjecT",
                         new AddressForm("sender@example.com", null),
@@ -105,7 +72,7 @@ public class SendGridEmailFactoryTest {
                                         null,
                                         asList(
                                                 new AddressForm("cc@example.com", null),
-                                                new AddressForm("cc2@example.com", "Cecetwo")
+                                                new AddressForm("cc2@example.com", null)
                                         ),
                                         null
                                 )
@@ -117,11 +84,14 @@ public class SendGridEmailFactoryTest {
                 "zoo"
         );
 
+        assertThat(results, hasSize(1));
+
+        EmailRecord result = results.stream().findFirst().get();
         assertThat(result, equalTo(new EmailRecord(
                 null,
                 "sender@example.com",
                 "",
-                "cc@example.com, Cecetwo <cc2@example.com>",
+                "cc@example.com, cc2@example.com",
                 "",
                 "My subjecT",
                 "Content content content!",
@@ -130,8 +100,8 @@ public class SendGridEmailFactoryTest {
     }
 
     @Test
-    public void testGetEmailFromRequest_BccRecipients() throws Exception {
-        EmailRecord result = factory.getEmailFromRequest(
+    public void testGetEmailsFromRequest_BccRecipients() throws Exception {
+        Collection<EmailRecord> results = factory.getEmailsFromRequest(
                 new MailSendForm(
                         "My subjecT",
                         new AddressForm("sender@example.com", null),
@@ -140,7 +110,7 @@ public class SendGridEmailFactoryTest {
                                         null,
                                         null,
                                         asList(
-                                                new AddressForm("bcc@example.com", "BeeCC"),
+                                                new AddressForm("bcc@example.com", null),
                                                 new AddressForm("bcc2@example.com", null)
                                         )
                                 )
@@ -152,12 +122,15 @@ public class SendGridEmailFactoryTest {
                 "zoo"
         );
 
+        assertThat(results, hasSize(1));
+
+        EmailRecord result = results.stream().findFirst().get();
         assertThat(result, equalTo(new EmailRecord(
                 null,
                 "sender@example.com",
                 "",
                 "",
-                "BeeCC <bcc@example.com>, bcc2@example.com",
+                "bcc@example.com, bcc2@example.com",
                 "My subjecT",
                 "Content content content!",
                 "zoo"
@@ -165,23 +138,58 @@ public class SendGridEmailFactoryTest {
     }
 
     @Test
-    public void testGetEmailFromRequest_DisplayNames() throws Exception {
-        EmailRecord result = factory.getEmailFromRequest(
+    public void testGetEmailsFromRequest_DisplayNames() throws Exception {
+        Collection<EmailRecord> results = factory.getEmailsFromRequest(
                 new MailSendForm(
                         "My subjecT",
                         new AddressForm("sender@example.com", "The Sender"),
                         asList(
                                 new PersonalizationForm(
+                                        asList(new AddressForm("to@example.com", "To Name")),
+                                        asList(new AddressForm("cc@example.com", "Ceecee")),
+                                        asList(new AddressForm("bcc@example.com", "BeeCC"))
+                                )
+                        ),
+                        asList(
+                                new ContentForm("text/plain", "Content content content!")
+                        )
+                ),
+                "zoo"
+        );
+
+
+        assertThat(results, hasSize(1));
+
+        EmailRecord result = results.stream().findFirst().get();
+        assertThat(result, equalTo(new EmailRecord(
+                null,
+                "The Sender <sender@example.com>",
+                "To Name <to@example.com>",
+                "Ceecee <cc@example.com>",
+                "BeeCC <bcc@example.com>",
+                "My subjecT",
+                "Content content content!",
+                "zoo"
+        )));
+    }
+
+    @Test
+    public void testGetEmailsFromRequest_MultiplePersonalizations() throws Exception {
+        Collection<EmailRecord> results = factory.getEmailsFromRequest(
+                new MailSendForm(
+                        "My subjecT",
+                        new AddressForm("sender@example.com", null),
+                        asList(
+                                new PersonalizationForm(
                                         asList(
-                                                new AddressForm("to1@example.com", "To Name"),
-                                                new AddressForm("to2@example.com", null)
+                                                new AddressForm("to1@example.com", null)
                                         ),
                                         null,
                                         null
                                 ),
                                 new PersonalizationForm(
                                         asList(
-                                                new AddressForm("to3@example.com", "Another")
+                                                new AddressForm("to2@example.com", null)
                                         ),
                                         null,
                                         null
@@ -194,15 +202,84 @@ public class SendGridEmailFactoryTest {
                 "zoo"
         );
 
-        assertThat(result, equalTo(new EmailRecord(
-                null,
-                "The Sender <sender@example.com>",
-                "To Name <to1@example.com>, to2@example.com, Another <to3@example.com>",
-                "",
-                "",
-                "My subjecT",
-                "Content content content!",
+        assertThat(results, containsInAnyOrder(
+                new EmailRecord(
+                        null,
+                        "sender@example.com",
+                        "to1@example.com",
+                        "",
+                        "",
+                        "My subjecT",
+                        "Content content content!",
+                        "zoo"
+                ),
+                new EmailRecord(
+                        null,
+                        "sender@example.com",
+                        "to2@example.com",
+                        "",
+                        "",
+                        "My subjecT",
+                        "Content content content!",
+                        "zoo"
+                )
+        ));
+    }
+
+    @Test
+    public void testGetEmailsFromRequest_FiltersByContentType() throws Exception {
+        Collection<EmailRecord> results = factory.getEmailsFromRequest(
+                new MailSendForm(
+                        "My subjecT",
+                        new AddressForm("sender@example.com", null),
+                        asList(
+                                new PersonalizationForm(
+                                        asList(
+                                                new AddressForm("to@example.com", null)
+                                        ),
+                                        null,
+                                        null
+                                )
+                        ),
+                        asList(
+                                new ContentForm("text/html", "<h1>Hello World</h1>"),
+                                new ContentForm("text/plain", "Content")
+                        )
+                ),
                 "zoo"
-        )));
+        );
+
+        assertThat(results, hasSize(1));
+
+        EmailRecord result = results.stream().findFirst().get();
+        assertThat(result.getBody(), equalTo("Content"));
+    }
+
+    @Test
+    public void testGetEmailsFromRequest_HandlesNoTextContent() throws Exception {
+        Collection<EmailRecord> results = factory.getEmailsFromRequest(
+                new MailSendForm(
+                        "My subjecT",
+                        new AddressForm("sender@example.com", null),
+                        asList(
+                                new PersonalizationForm(
+                                        asList(
+                                                new AddressForm("to@example.com", null)
+                                        ),
+                                        null,
+                                        null
+                                )
+                        ),
+                        asList(
+                                new ContentForm("text/html", "<h1>Hello World</h1>")
+                        )
+                ),
+                "zoo"
+        );
+
+        assertThat(results, hasSize(1));
+
+        EmailRecord result = results.stream().findFirst().get();
+        assertThat(result.getBody(), equalTo(""));
     }
 }

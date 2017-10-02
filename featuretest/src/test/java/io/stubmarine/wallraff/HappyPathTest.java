@@ -100,13 +100,13 @@ public class HappyPathTest extends SeleniumTest {
     }
 
     private Response sendEmailUsingSendgrid(String token) throws Exception {
-        Email from = new Email("sendgrid@example.com", "Sender");
-        String subject = "Sending with SendGrid is Fun";
-        Email to = new Email("featuretest@example.com", "Feature Test");
-        Content content = new Content("text/plain", "B0dy");
-        Mail mail = new Mail(from, subject, to, content);
+        Mail mail = new Mail();
+        mail.subject = "Sending with SendGrid is Fun";
+        mail.from = new Email("sendgrid@example.com", "Sender");
+        mail.addContent(new Content("text/plain", "B0dy"));
 
         Personalization personalization = new Personalization();
+        personalization.addTo(new Email("featuretest@example.com", "Feature Test"));
         personalization.addTo(new Email("anotherto@example.com"));
         personalization.addCc(new Email("cece@example.com"));
         personalization.addCc(new Email("anotherseasea@example.com", "Seasea"));

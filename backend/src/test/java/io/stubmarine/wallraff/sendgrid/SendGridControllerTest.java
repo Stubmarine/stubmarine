@@ -14,7 +14,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Collections;
+
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -48,7 +51,7 @@ public class SendGridControllerTest {
     @Test
     public void testMailSend() throws Exception {
         EmailRecord generatedRecord = mock(EmailRecord.class);
-        when(sendGridEmailFactory.getEmailFromRequest(any(), any())).thenReturn(generatedRecord);
+        when(sendGridEmailFactory.getEmailsFromRequest(any(), any())).thenReturn(asList(generatedRecord));
 
         EmailRecord savedRecord = mock(EmailRecord.class);
         when(emailRepository.save(any(EmailRecord.class))).thenReturn(savedRecord);
@@ -88,7 +91,7 @@ public class SendGridControllerTest {
         verify(sendGridTokenVerifier).verify("foobar");
         verify(sendGridTokenVerifier).extractInbox("foobar");
 
-        verify(sendGridEmailFactory).getEmailFromRequest(
+        verify(sendGridEmailFactory).getEmailsFromRequest(
                 new MailSendForm(
                         "My subjecT",
                         new AddressForm("sender@example.com", null),
@@ -115,7 +118,7 @@ public class SendGridControllerTest {
     @Test
     public void testMailSend_MultipleRecipients() throws Exception {
         EmailRecord generatedRecord = mock(EmailRecord.class);
-        when(sendGridEmailFactory.getEmailFromRequest(any(), any())).thenReturn(generatedRecord);
+        when(sendGridEmailFactory.getEmailsFromRequest(any(), any())).thenReturn(asList(generatedRecord));
 
         EmailRecord savedRecord = mock(EmailRecord.class);
         when(emailRepository.save(generatedRecord)).thenReturn(savedRecord);
@@ -155,7 +158,7 @@ public class SendGridControllerTest {
         );
 
 
-        verify(sendGridEmailFactory).getEmailFromRequest(
+        verify(sendGridEmailFactory).getEmailsFromRequest(
                 new MailSendForm(
                         "My subjecT",
                         new AddressForm("sender@example.com", null),
@@ -189,7 +192,7 @@ public class SendGridControllerTest {
     @Test
     public void testMailSend_CcRecipients() throws Exception {
         EmailRecord generatedRecord = mock(EmailRecord.class);
-        when(sendGridEmailFactory.getEmailFromRequest(any(), any())).thenReturn(generatedRecord);
+        when(sendGridEmailFactory.getEmailsFromRequest(any(), any())).thenReturn(asList(generatedRecord));
 
         EmailRecord savedRecord = mock(EmailRecord.class);
         when(emailRepository.save(generatedRecord)).thenReturn(savedRecord);
@@ -223,7 +226,7 @@ public class SendGridControllerTest {
                         .header("Authorization", "Bearer foobar")
         );
 
-        verify(sendGridEmailFactory).getEmailFromRequest(
+        verify(sendGridEmailFactory).getEmailsFromRequest(
                 new MailSendForm(
                         "My subjecT",
                         new AddressForm("sender@example.com", null),
@@ -250,7 +253,7 @@ public class SendGridControllerTest {
     @Test
     public void testMailSend_BccRecipients() throws Exception {
         EmailRecord generatedRecord = mock(EmailRecord.class);
-        when(sendGridEmailFactory.getEmailFromRequest(any(), any())).thenReturn(generatedRecord);
+        when(sendGridEmailFactory.getEmailsFromRequest(any(), any())).thenReturn(asList(generatedRecord));
 
         EmailRecord savedRecord = mock(EmailRecord.class);
         when(emailRepository.save(generatedRecord)).thenReturn(savedRecord);
@@ -285,7 +288,7 @@ public class SendGridControllerTest {
         );
 
 
-        verify(sendGridEmailFactory).getEmailFromRequest(
+        verify(sendGridEmailFactory).getEmailsFromRequest(
                 new MailSendForm(
                         "My subjecT",
                         new AddressForm("sender@example.com", null),
@@ -312,7 +315,7 @@ public class SendGridControllerTest {
     @Test
     public void testMailSend_DisplayNames() throws Exception {
         EmailRecord generatedRecord = mock(EmailRecord.class);
-        when(sendGridEmailFactory.getEmailFromRequest(any(), any())).thenReturn(generatedRecord);
+        when(sendGridEmailFactory.getEmailsFromRequest(any(), any())).thenReturn(asList(generatedRecord));
 
         EmailRecord savedRecord = mock(EmailRecord.class);
         when(emailRepository.save(generatedRecord)).thenReturn(savedRecord);
@@ -355,7 +358,7 @@ public class SendGridControllerTest {
         );
 
 
-        verify(sendGridEmailFactory).getEmailFromRequest(
+        verify(sendGridEmailFactory).getEmailsFromRequest(
                 new MailSendForm(
                         "My subjecT",
                         new AddressForm("sender@example.com", "The Sender"),
@@ -384,6 +387,86 @@ public class SendGridControllerTest {
         );
 
         verify(emailWebSocketHandler).broadcastNewEmailMessage(savedRecord);
+    }
+
+
+    @Test
+    public void testMailSend_MultipleEmails() throws Exception {
+        EmailRecord generatedFirst = mock(EmailRecord.class);
+        EmailRecord generatedSecond = mock(EmailRecord.class);
+        when(sendGridEmailFactory.getEmailsFromRequest(any(), any()))
+                .thenReturn(asList(generatedFirst, generatedSecond));
+
+        EmailRecord savedFirst = mock(EmailRecord.class);
+        when(emailRepository.save(generatedFirst)).thenReturn(savedFirst);
+
+        EmailRecord savedSecond = mock(EmailRecord.class);
+        when(emailRepository.save(generatedSecond)).thenReturn(savedSecond);
+
+        when(sendGridTokenVerifier.verify(any())).thenReturn(true);
+        when(sendGridTokenVerifier.extractInbox(any())).thenReturn("zoo");
+
+        String content = "" +
+                "{" +
+                "  \"personalizations\": []," +
+                "  \"subject\": \"\"," +
+                "  \"from\": {" +
+                "    \"email\": \"\"" +
+                "  }," +
+                "  \"content\": [{" +
+                "    \"type\": \"text/plain\"," +
+                "    \"value\": \"\"" +
+                "  }]" +
+                "}";
+
+
+        mockMvc.perform(
+                post("/eapi/sendgrid/v3/mail/send")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content)
+                        .header("Authorization", "Bearer foobar")
+        );
+
+
+        verify(emailRepository).save(generatedFirst);
+        verify(emailRepository).save(generatedSecond);
+
+        verify(emailWebSocketHandler).broadcastNewEmailMessage(savedFirst);
+        verify(emailWebSocketHandler).broadcastNewEmailMessage(savedSecond);
+    }
+
+    @Test
+    public void testMailSend_NoEmails() throws Exception {
+        when(sendGridEmailFactory.getEmailsFromRequest(any(), any()))
+                .thenReturn(emptyList());
+
+        when(sendGridTokenVerifier.verify(any())).thenReturn(true);
+        when(sendGridTokenVerifier.extractInbox(any())).thenReturn("zoo");
+
+        String content = "" +
+                "{" +
+                "  \"personalizations\": []," +
+                "  \"subject\": \"\"," +
+                "  \"from\": {" +
+                "    \"email\": \"\"" +
+                "  }," +
+                "  \"content\": [{" +
+                "    \"type\": \"text/plain\"," +
+                "    \"value\": \"\"" +
+                "  }]" +
+                "}";
+
+
+        mockMvc.perform(
+                post("/eapi/sendgrid/v3/mail/send")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content)
+                        .header("Authorization", "Bearer foobar")
+        );
+
+
+        verifyZeroInteractions(emailRepository);
+        verifyZeroInteractions(emailWebSocketHandler);
     }
 
 
