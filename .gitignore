@@ -18,3 +18,4 @@ featuretest/gradlew
 featuretest/gradlew.bat
 featuretest/snapshots/
 *.iml
+.DS_Store

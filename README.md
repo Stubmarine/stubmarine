@@ -1,4 +1,4 @@
-# Wallraff
+# Stubmarine
 
 Simulate email universe that assists in development of software.
 The software that powers Stubmarine.
