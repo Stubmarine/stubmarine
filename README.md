@@ -52,3 +52,7 @@ Deploy by:
 1. Activate env via `source activate stubmarine`
 1. Install requirements via `pip install -r misc/requirements.txt`
 1. Run misc commands via `python misc/*.py`
+
+## License
+
+Licensed under the MIT License.
