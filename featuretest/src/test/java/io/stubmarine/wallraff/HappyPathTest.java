@@ -21,7 +21,7 @@ import static org.springframework.http.HttpStatus.ACCEPTED;
 @SpringBootTest(
         classes = WallraffApplication.class,
         webEnvironment = RANDOM_PORT,
-        properties = {"jwtSecret=secret"}
+        properties = {"jwtSecret=happyPathSecret"}
 )
 public class HappyPathTest extends SeleniumTest {
     @LocalServerPort

@@ -21,7 +21,7 @@ The software that powers Stubmarine.
 
 ### Quick Start Application
 
-1. Start the backend via`JWTSECRET=secret ./gradew :backend:bootRun`
+1. Start the backend via `./gradew :backend:bootRun`
 1. Start the frontend by:
     1. `cd frontend`
     1. `yarn start`
@@ -43,6 +43,7 @@ Deployment uses the Cloud Foundry CLI:
 Deploy by:
 1. Build UberJar as above
 1. `cf push stubmarine`
+1. `cf set-env stubmarine JWTSECRET <a_unique_value_here>`
 
 ## Misc Python scripts
 
