@@ -1,58 +1,28 @@
 # Stubmarine
 
-Simulate email universe that assists in development of software.
-The software that powers Stubmarine.
+Interactive stubbed mock endpoints for popular SaaS services.
 
 ## Getting Started
 
 ### Install Dependencies
 
-1. Yarn globally via `brew install yarn`
-1. ChromeDriver globally via
-    1. `brew install chromedriver`
-    1. `mkdir -p ~/.chromdrivertest && ln -s /usr/local/bin/chromedriver ~/.chromdrivertest/chromedriver`
-1. Frontend dependencies via
-    1. `cd frontend`
-    1. `yarn install`
-    1. `cd ..`
-1. Backend dependencies via 
-    1. `cd backend`
-    1. `./gradlew`
+1.  Dotnet Core SDK via `brew cask install dotnet-sdk`
+1.  Elm 0.19 via `brew install elm`
+1.  elm-format via `brew install elm-format`
+1.  libsass via `brew install libsass`
 
 ### Quick Start Application
 
-1. Start the backend via `./gradew :backend:bootRun`
-1. Start the frontend by:
-    1. `cd frontend`
-    1. `yarn start`
-1. Navigate to [localhost:3000](http://localhost:3000)
+1.  `./build.sh`
+2.  `./start.sh`
 
 ## Testing
 
-Run all tests via `./gradlew testAll`
+## Building
 
-## Building an UberJar
+1.  `./build.sh`
 
-1. `./gradlew buildUberJar`
-
-## Deploying
-
-Deployment uses the Cloud Foundry CLI:
-1. `brew install cloudfoundry/tap/cf-cli`
-
-Deploy by:
-1. Build UberJar as above
-1. `cf push stubmarine`
-1. `cf set-env stubmarine JWTSECRET <a_unique_value_here>`
-
-## Misc Python scripts
-
-1. Install Miniconda via `brew cask install miniconda`
-1. Add Miniconda bin to path
-1. Create conda env via `conda create --name stubmarine python=3.6`
-1. Activate env via `source activate stubmarine`
-1. Install requirements via `pip install -r misc/requirements.txt`
-1. Run misc commands via `python misc/*.py`
+## Deploying 
 
 ## License
 

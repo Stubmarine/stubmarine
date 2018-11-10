@@ -1,2 +1,0 @@
-include ':backend'
-project(':backend').projectDir = new File(settingsDir, '../backend')
