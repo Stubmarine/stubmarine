@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 set -e
 
-dotnet build
+dotnet publish -c Release
 

@@ -4,5 +4,10 @@ set -e
 rm -rf dist
 mkdir dist
 
-elm make src/Main.elm --output dist/index.html
+cp static/* dist/
 
+elm make --optimize src/Main.elm --output dist/app.js
+
+pushd ..
+dotnet run --project build
+popd

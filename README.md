@@ -24,6 +24,10 @@ Interactive stubbed mock endpoints for popular SaaS services.
 
 ## Deploying 
 
+1.  cf login ...
+1.  `./build.sh`
+1.  `./deploy.sh`
+
 ## License
 
 Licensed under the MIT License.
