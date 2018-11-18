@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="SendGrid.fs" />
     <Compile Include="App.fs" />
   </ItemGroup>
 
