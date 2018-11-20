@@ -169,11 +169,19 @@ let private printfEmailMessage (message : EmailMessage) : Unit =
     List.iter printfContent message.content
     printfn ""
 
+// infrastructure
+let private store = ResizeArray<EmailMessage>()
+
+let private addEmails (items : EmailMessage list) : EmailMessage list =
+    items |> List.iter store.Add
+    items
+
 // flows
 let private printEmailAndOk (form : MailSendForm) : string =
     form
     |> toMailSend
     |> deliver
+    |> addEmails
     |> List.iter printfEmailMessage
     "sent"
 
