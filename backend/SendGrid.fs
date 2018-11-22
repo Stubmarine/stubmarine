@@ -1,11 +1,12 @@
 module SendGrid
 
+open Suave
 open Suave.Filters
 open Suave.Operators
 open Suave.Json
 open System.Runtime.Serialization
 
-// DTOs
+// DTOs (SendGrid API)
 [<DataContract>]
 type private AddressForm =
     { [<field:DataMember(Name = "email")>]
@@ -39,6 +40,32 @@ type private MailSendForm =
       personalizations : PersonalizationForm []
       [<field:DataMember(Name = "content")>]
       content : ContentForm [] }
+
+// DTOs (Stubmarine API)
+[<DataContract>]
+type private RecipientView =
+    { [<field:DataMember(Name = "email")>]
+      email : string
+      [<field:DataMember(Name = "name")>]
+      name : string }
+
+[<DataContract>]
+type private EmailView =
+    { [<field:DataMember(Name = "from")>]
+      from : RecipientView
+      [<field:DataMember(Name = "to")>]
+      to_ : RecipientView []
+      [<field:DataMember(Name = "cc")>]
+      cc : RecipientView []
+      [<field:DataMember(Name = "bcc")>]
+      bcc : RecipientView []
+      [<field:DataMember(Name = "subject")>]
+      subject : string
+      [<field:DataMember(Name = "body")>]
+      body : string }
+
+[<DataContract>]
+type private EmailListView = EmailView []
 
 // Domain
 type private Email = string
@@ -137,6 +164,40 @@ let private toMailSend (form : MailSendForm) : MailSend =
       personalizations = personalizations
       content = content }
 
+// Domain > DTO
+let private toRecipientView (address : Address) : RecipientView =
+    match address with
+    | EmailOnly email -> 
+        { email = email
+          name = Unchecked.defaultof<string> }
+    | EmailAndName(email, name) -> 
+        { email = email
+          name = name }
+
+let private toEmailView (email : EmailMessage) : EmailView =
+    let toRecipients addresses =
+        addresses
+        |> List.map toRecipientView
+        |> List.toArray
+    
+    let firstContent content =
+        email.content
+        |> List.first
+        |> Option.bind (fun (c : Content) -> Some c.value)
+        |> Option.orDefault (fun () -> "-- No body --")
+    
+    { from = email.from |> toRecipientView
+      to_ = email.to_ |> toRecipients
+      cc = email.cc |> toRecipients
+      bcc = email.bcc |> toRecipients
+      subject = email.subject
+      body = email.content |> firstContent }
+
+let private toEmailListView (emails : EmailMessage list) : EmailListView =
+    emails
+    |> List.map toEmailView
+    |> List.toArray
+
 // console outputting
 let private sprintAddress (address : Address) : string =
     match address with
@@ -185,4 +246,14 @@ let private printEmailAndOk (form : MailSendForm) : string =
     |> List.iter printfEmailMessage
     "sent"
 
-let sendGridApp = POST >=> path "/v3/mail/send" >=> mapJson printEmailAndOk
+let private listEmails (request) : WebPart =
+    store.ToArray()
+    |> Array.toList
+    |> toEmailListView
+    |> toJson
+    |> Successful.ok
+    >=> Writers.setMimeType "application/json"
+
+let sendGridApp =
+    choose [ POST >=> path "/v3/mail/send" >=> mapJson printEmailAndOk
+             GET >=> path "/api/sendgrid/emails" >=> request listEmails ]
