@@ -41,6 +41,20 @@ type private MailSendForm =
       [<field:DataMember(Name = "content")>]
       content : ContentForm [] }
 
+[<DataContract>]
+type private ErrorView =
+    { [<field:DataMember(Name = "message")>]
+      message : string
+      [<field:DataMember(Name = "field")>]
+      field : string
+      [<field:DataMember(Name = "help")>]
+      help : string }
+
+[<DataContract>]
+type private ErrorsView =
+    { [<field:DataMember(Name = "errors")>]
+      errors : ErrorView [] }
+
 // DTOs (Stubmarine API)
 [<DataContract>]
 type private RecipientView =
@@ -198,6 +212,18 @@ let private toEmailListView (emails : EmailMessage list) : EmailListView =
     |> List.map toEmailView
     |> List.toArray
 
+let private toErrors (message : string) : ErrorsView =
+    let error =
+        { message = message
+          field = Unchecked.defaultof<string>
+          help = Unchecked.defaultof<string> }
+    { errors = [| error |] }
+
+let private errorToJson (message : string) : byte [] =
+    message
+    |> toErrors
+    |> toJson
+
 // console outputting
 let private sprintAddress (address : Address) : string =
     match address with
@@ -238,13 +264,16 @@ let private addEmails (items : EmailMessage list) : EmailMessage list =
     items
 
 // flows
-let private printEmailAndOk (form : MailSendForm) : string =
+let private deliverMailSend (request : HttpRequest) : WebPart =
+    let form = fromJson<MailSendForm> request.rawForm
     form
     |> toMailSend
     |> deliver
     |> addEmails
     |> List.iter printfEmailMessage
-    "sent"
+    ""
+    |> Successful.ACCEPTED
+    >=> Writers.setMimeType "text/plain; charset=utf-8"
 
 let private listEmails (request) : WebPart =
     store.ToArray()
@@ -254,6 +283,26 @@ let private listEmails (request) : WebPart =
     |> Successful.ok
     >=> Writers.setMimeType "application/json"
 
+let private protect (validToken : string) (protectedPart : WebPart) (x : HttpContext) : Async<HttpContext option> =
+    async { 
+        let validValue = sprintf "Bearer %s" validToken
+        let authHeader = x.request.header "Authorization"
+        
+        let authErrorMessage =
+            match authHeader with
+            | Choice1Of2 authHeader -> 
+                if (String.equals authHeader validValue) then None
+                else Some "The provided authorization grant is invalid, expired, or revoked"
+            | Choice2Of2 _ -> Some "Permission denied, wrong credentials"
+        
+        let response =
+            match authErrorMessage with
+            | None -> protectedPart x
+            | Some err -> RequestErrors.unauthorized (errorToJson err) x
+        
+        return! response
+    }
+
 let sendGridApp =
-    choose [ POST >=> path "/v3/mail/send" >=> mapJson printEmailAndOk
+    choose [ POST >=> path "/v3/mail/send" >=> protect "1234" (request deliverMailSend)
              GET >=> path "/api/sendgrid/emails" >=> request listEmails ]
