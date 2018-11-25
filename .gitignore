@@ -19,3 +19,6 @@ featuretest/gradlew.bat
 featuretest/snapshots/
 *.iml
 .DS_Store
+
+backend-tests/bin
+backend-tests/obj
