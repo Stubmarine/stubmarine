@@ -263,6 +263,16 @@ let private addEmails (items : EmailMessage list) : EmailMessage list =
     items |> List.iter store.Add
     items
 
+let private clientUserAgent (x : HttpContext) : Async<HttpContext option> =
+    async { 
+        let userAgentHeader = x.request.header "User-agent"
+        return match userAgentHeader with
+               | Choice2Of2 _ -> None
+               | Choice1Of2 userAgent -> 
+                   if userAgent.StartsWith "sendgrid/" then (Some x)
+                   else None
+    }
+
 // flows
 let private deliverMailSend (request : HttpRequest) : WebPart =
     let form = fromJson<MailSendForm> request.rawForm
@@ -284,13 +294,13 @@ let private listEmails (request) : WebPart =
     >=> Writers.setMimeType "application/json"
 
 let private protect (validToken : string) (protectedPart : WebPart) (x : HttpContext) : Async<HttpContext option> =
-    async { 
+    async {
         let validValue = sprintf "Bearer %s" validToken
         let authHeader = x.request.header "Authorization"
         
         let authErrorMessage =
             match authHeader with
-            | Choice1Of2 authHeader -> 
+            | Choice1Of2 authHeader ->
                 if (String.equals authHeader validValue) then None
                 else Some "The provided authorization grant is invalid, expired, or revoked"
             | Choice2Of2 _ -> Some "Permission denied, wrong credentials"
@@ -304,5 +314,5 @@ let private protect (validToken : string) (protectedPart : WebPart) (x : HttpCon
     }
 
 let sendGridApp =
-    choose [ POST >=> path "/v3/mail/send" >=> protect "1234" (request deliverMailSend)
+    choose [ POST >=> clientUserAgent >=> path "/v3/mail/send" >=> protect "1234" (request deliverMailSend)
              GET >=> path "/api/sendgrid/emails" >=> request listEmails ]
