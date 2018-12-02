@@ -2,7 +2,7 @@ module SendGridTest
 
 open NUnit.Framework
 open FsUnit
-open SendGrid
+open SendGrid.App
 open Suave.Http
 
 let private extractSome hc =
@@ -61,7 +61,7 @@ let ``Happy path "mail send" call``() =
     }"""
     |> withHeader ("Authorization", "Bearer 1234")
     |> withHeader ("User-agent", "sendgrid/3.0.0;java")
-    |> sendGridApp
+    |> sendGridApp ignore []
     |> Async.RunSynchronously
     |> extractSome
     |> extractStatusCode
@@ -93,6 +93,6 @@ let ``Not from a SendGrid client``() =
     }"""
     |> withHeader ("Authorization", "Bearer 1234")
     |> withHeader ("User-agent", "Chrome")
-    |> sendGridApp
+    |> sendGridApp ignore []
     |> Async.RunSynchronously
     |> should equal None

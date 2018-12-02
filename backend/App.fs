@@ -10,7 +10,8 @@ open System.IO
 open System.Runtime.Serialization
 open System.Text
 
-open SendGrid
+open SendGrid.App
+open SendGrid.Persistence
 
 [<EntryPoint>]
 let main _ =
@@ -24,7 +25,7 @@ let main _ =
     let app : WebPart =
         choose [ GET >=> path "/" >=> Files.file "./static/index.html"
                  
-                 sendGridApp
+                 sendGridApp saveEmails getEmails
                  
                  GET >=> Files.browseHome
                  RequestErrors.NOT_FOUND "Page not found." ]

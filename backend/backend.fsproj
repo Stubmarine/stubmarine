@@ -7,7 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="SendGrid.fs" />
+    <Compile Include="SendGrid.Domain.fs" />
+    <Compile Include="SendGrid.FormDto.fs" />
+    <Compile Include="SendGrid.ViewDto.fs" />
+    <Compile Include="SendGrid.App.fs" />
+    <Compile Include="SendGrid.Persistence.fs" />
     <Compile Include="App.fs" />
   </ItemGroup>
 
